@@ -1,6 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val exposedVersion = "0.37.3"
+
 group = "net.bruty"
 version = "0.0.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_17
@@ -42,10 +43,16 @@ dependencies {
 }
 
 plugins {
+	// Spring
 	id("org.springframework.boot") version "2.7.4"
 	id("io.spring.dependency-management") version "1.0.14.RELEASE"
+
+	// Kotlin
 	kotlin("jvm") version "1.6.21"
 	kotlin("plugin.spring") version "1.6.21"
+
+	// Graphql code gen
+	id("com.netflix.dgs.codegen") version "5.1.14"
 }
 
 tasks.withType<KotlinCompile> {
