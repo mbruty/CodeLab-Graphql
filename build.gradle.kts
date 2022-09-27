@@ -1,6 +1,6 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-val exposedVersion = "0.37.3"
+val exposedVersion = "0.39.1"
 
 group = "net.bruty"
 version = "0.0.1-SNAPSHOT"
@@ -39,7 +39,13 @@ dependencies {
 	// Bcrypt | hashing
 	implementation("org.mindrot:jbcrypt:0.4")
 
+	// ORM | Jetbrains Exposed
+	implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+	implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
+	implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
 
+	// Postgres driver
+	implementation("org.postgresql:postgresql:42.2.26")
 }
 
 plugins {
@@ -77,6 +83,6 @@ tasks.generateJava {
 	)
 	schemaPaths =
 		listOf("${projectDir}/src/main/resources/schema").toMutableList() // List of directories containing schema files
-	packageName = "com.tastebuds" // The package name to use to generate sources
+	packageName = "net.bruty" // The package name to use to generate sources
 	generateClient = true // Enable generating the type safe query API
 }
