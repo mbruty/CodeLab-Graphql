@@ -1,0 +1,33 @@
+scalar Long
+
+type Query {
+    authCheck: Boolean
+    evaluate(code: String!, language: String!): CodeResponse!
+    me: User!
+}
+
+type Mutation {
+    login(email: String!, password: String!): User
+    logout: Boolean
+    logoutAll: Boolean
+    signUp(email: String!, username: String!, password: String!): User
+}
+
+type CodeResponse {
+    output: [String]!
+    stats: [Stat]!
+    executionTimeMS: Long
+}
+
+type Stat {
+    cpu: String!
+    mem: String!
+}
+
+type User {
+    id: Int
+    email: String!
+    username: String!
+    password: String!
+    refreshCount: Int!
+}

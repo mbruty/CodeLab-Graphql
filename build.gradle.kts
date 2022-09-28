@@ -1,6 +1,6 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-val exposedVersion = "0.39.1"
+val exposedVersion = "0.38.2"
 
 group = "net.bruty"
 version = "0.0.1-SNAPSHOT"
@@ -11,41 +11,56 @@ repositories {
 }
 
 dependencies {
-	// Spring
+	implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
+
+	// region Bcrypt | hashing
+	implementation("org.mindrot:jbcrypt:0.4")
+	// endregion
+
+	// region GraphQL | Netflix DGS framework
+	implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:5.2.2"))
+	implementation("com.netflix.graphql.dgs:graphql-dgs-spring-boot-starter")
+	// endregion
+
+	// region JWeaver
+	implementation("org.aspectj:aspectjweaver:1.8.12")
+	// endregion
+
+	// region JWT
+	implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
+	// endregion
+
+	// region Metrics
+	implementation("com.netflix.graphql.dgs:graphql-dgs-spring-boot-micrometer")
+	implementation ("io.micrometer:micrometer-registry-prometheus:1.9.4")
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	// endregion
+
+	// region ORM | Jetbrains Exposed
+	// Update when this issue is fixed https://github.com/JetBrains/Exposed/issues/1556
+	implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+	implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
+	implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+	// endregion
+
+	// region Postgres driver
+	implementation("org.postgresql:postgresql:42.5.0")
+	// endregion
+
+	// region Spring
 	implementation("org.springframework.boot:spring-boot-starter-amqp") // Advance message query protocol | rabbitmq
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+	// endregion
 
-	// GraphQL | Netflix DGS framework
-	implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:latest.release"))
-	implementation("com.netflix.graphql.dgs:graphql-dgs-spring-boot-starter")
-
-	// Spring testing
+	// region Spring testing
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.amqp:spring-rabbit-test")
-
-	// Metrics
-	implementation("com.netflix.graphql.dgs:graphql-dgs-spring-boot-micrometer")
-	implementation ("io.micrometer:micrometer-registry-prometheus:1.8.1")
-	implementation("org.springframework.boot:spring-boot-starter-actuator")
-
-	// JWT
-	implementation("io.jsonwebtoken:jjwt-api:0.11.2")
-	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.2")
-	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.2")
-
-	// Bcrypt | hashing
-	implementation("org.mindrot:jbcrypt:0.4")
-
-	// ORM | Jetbrains Exposed
-	implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
-	implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
-	implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
-
-	// Postgres driver
-	implementation("org.postgresql:postgresql:42.2.26")
+	// endregion
 }
 
 plugins {
@@ -56,6 +71,7 @@ plugins {
 	// Kotlin
 	kotlin("jvm") version "1.6.21"
 	kotlin("plugin.spring") version "1.6.21"
+	kotlin("plugin.serialization") version "1.4.0"
 
 	// Graphql code gen
 	id("com.netflix.dgs.codegen") version "5.1.14"
