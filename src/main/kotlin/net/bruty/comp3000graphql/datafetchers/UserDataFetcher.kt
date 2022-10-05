@@ -81,7 +81,7 @@ class UserDataFetcher {
         @InputArgument password: String,
         dfe: DgsDataFetchingEnvironment
     ): User {
-        val user = User(email = email, username = username, password = password, refreshCount = 0)
+        val user = User(email = email, username = username, password = password, refreshCount = 0, xp = 0)
         val created = _userRepo.create(user)
 
         _security.setTokens(created.toPrincipal(), CookieHandlerFactory.getHandler(dfe))

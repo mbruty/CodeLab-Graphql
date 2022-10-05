@@ -15,11 +15,13 @@ object UsersTable: IntIdTable() {
     val username: Column<String> = varchar("name", 25)
     val password: Column<String> = varchar("password", 72) // 72 is Bcrypt maximum hash length
     val refereshCount: Column<Int> = integer("refresh_count").default(0)
+    val xp: Column<Int> = integer("xp").default(0)
 }
 class UserEntity(id: EntityID<Int>): IntEntity(id) {
     companion object : IntEntityClass<UserEntity>(UsersTable)
     var email by UsersTable.email
     var username by UsersTable.username
+    var xp by UsersTable.xp
 
     private var _password by UsersTable.password
 
@@ -34,7 +36,7 @@ class UserEntity(id: EntityID<Int>): IntEntity(id) {
     var refreshCount by UsersTable.refereshCount
 
     fun toModel(): User {
-        return User(id.value, email, username, password, refreshCount)
+        return User(id.value, email, username, password, refreshCount, xp)
     }
 
     fun verifyHash(password: String): Boolean {

@@ -4,6 +4,7 @@ type Query {
     authCheck: Boolean
     evaluate(code: String!, language: String!): CodeResponse!
     me: User!
+    programmingTask(taskId: Int!, language: String!): ProgrammingTask!
 }
 
 type Mutation {
@@ -30,4 +31,12 @@ type User {
     username: String!
     password: String!
     refreshCount: Int!
+    xp: Int!
+}
+
+type ProgrammingTask {
+    title: String!
+    description: String!
+    starterCode: String!
+    testCode: String!
 }

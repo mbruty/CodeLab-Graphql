@@ -1,8 +1,13 @@
 package net.bruty.comp3000graphql
 
+import net.bruty.comp3000graphql.model.LanguageTable
+import net.bruty.comp3000graphql.model.ProgrammingTaskStarterCodeTable
+import net.bruty.comp3000graphql.model.ProgrammingTaskTable
 import net.bruty.comp3000graphql.model.UsersTable
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.StdOutSqlLogger
+import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class DbUtils {
@@ -17,7 +22,11 @@ class DbUtils {
 
         fun createTables() {
             transaction {
+                addLogger(StdOutSqlLogger)
                 SchemaUtils.create(UsersTable)
+                SchemaUtils.create(LanguageTable)
+                SchemaUtils.create(ProgrammingTaskTable)
+                SchemaUtils.create(ProgrammingTaskStarterCodeTable)
             }
         }
     }
