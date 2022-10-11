@@ -1,5 +1,6 @@
 package net.bruty.comp3000graphql.model
 
+import net.bruty.comp3000graphql.model.ProgrammingTaskEntity.Companion.referrersOn
 import net.bruty.comp3000graphql.security.IPrincipal
 import net.bruty.comp3000graphql.security.UserPrincipal
 import net.bruty.types.User
@@ -22,6 +23,7 @@ class UserEntity(id: EntityID<Int>): IntEntity(id) {
     var email by UsersTable.email
     var username by UsersTable.username
     var xp by UsersTable.xp
+    val taskSubmissions by UserCodeSubmissionEntity referrersOn UserCodeSubmissionTable.createdBy
 
     private var _password by UsersTable.password
 

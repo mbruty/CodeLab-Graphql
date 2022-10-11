@@ -2,9 +2,20 @@ scalar Long
 
 type Query {
     authCheck: Boolean
-    evaluate(code: String!, language: String!): CodeResponse!
+    evaluate(code: String!, language: String!, taskId: Int!): CodeResponse!
     me: User!
     programmingTask(taskId: Int!, language: String!): ProgrammingTask!
+}
+
+input UserCodeSubmissionInput {
+    codeText: String!
+    executionTime: Int
+    memoryUsage: [Int]
+    isSubmitted: Boolean
+    hasSharedWithModuleStaff: Boolean
+    hasSharedWithStudents: Boolean
+    taskId: Int!
+    language: String!
 }
 
 type Mutation {
@@ -12,12 +23,15 @@ type Mutation {
     logout: Boolean
     logoutAll: Boolean
     signUp(email: String!, username: String!, password: String!): User
+    submitCode(codeText: String!, isWorkInProgress: Boolean!): Boolean
 }
 
 type CodeResponse {
-    output: [String]!
+    output: String
     stats: [Stat]!
-    executionTimeMS: Long
+    errorText: String
+    executionTimeMS: Long!
+    isSuccessful: Boolean!
 }
 
 type Stat {
@@ -35,8 +49,24 @@ type User {
 }
 
 type ProgrammingTask {
+    id: Int!
     title: String!
     description: String!
     starterCode: String!
     testCode: String!
+    language: String!
+    availableLanguages: [String]
+    myCode: String
+}
+
+type UserCodeSubmission {
+    codeText: String!
+    executionTime: Int!
+    memoryUsage: [Int]!
+    isSubmitted: Boolean!
+    hasSharedWithModuleStaff: Boolean!
+    hasSharedWithStudents: Boolean!
+    createdBy: User!
+    task: ProgrammingTask
+    language: String!
 }

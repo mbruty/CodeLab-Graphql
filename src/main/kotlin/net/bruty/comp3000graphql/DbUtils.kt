@@ -1,9 +1,6 @@
 package net.bruty.comp3000graphql
 
-import net.bruty.comp3000graphql.model.LanguageTable
-import net.bruty.comp3000graphql.model.ProgrammingTaskStarterCodeTable
-import net.bruty.comp3000graphql.model.ProgrammingTaskTable
-import net.bruty.comp3000graphql.model.UsersTable
+import net.bruty.comp3000graphql.model.*
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
@@ -26,6 +23,7 @@ class DbUtils {
                 SchemaUtils.create(UsersTable)
                 SchemaUtils.create(LanguageTable)
                 SchemaUtils.create(ProgrammingTaskTable)
+                SchemaUtils.create(UserCodeSubmissionTable)
                 SchemaUtils.create(ProgrammingTaskStarterCodeTable)
             }
         }
