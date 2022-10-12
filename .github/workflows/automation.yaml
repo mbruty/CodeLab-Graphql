@@ -32,22 +32,22 @@ jobs:
       - name: Run Gradle Release
         run: ./gradlew release
       - name: Upload tag number
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: tag
           path: tag.txt
       - name: Upload dockerfile
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: dockerfile
           path: dockerfile
       - name: Upload release text
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: release
           path: release.txt
       - name: Upload build.gradle
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: gradle
           path: build.gradle.kts
@@ -58,7 +58,7 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
       - name: Upload jar
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: jar
           path: ./build/libs/*.jar
@@ -68,15 +68,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download tag
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: tag
       - name: Download release
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: release
       - name: Download Jar
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: jar
       - name: Set Environment
@@ -85,7 +85,7 @@ jobs:
           echo "RELEASE=$(cat release.txt)" >> $GITHUB_ENV
           echo "JAR=$(echo *.jar)" >> $GITHUB_ENV
       - name: Download dockerfile
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: dockerfile
       - name: Log in to GitHub Docker Registry
@@ -115,7 +115,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
       - name: Download tag
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: gradle
       - name: Commit release changes
@@ -131,7 +131,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Download tag
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: tag
       - name: Set Environment
