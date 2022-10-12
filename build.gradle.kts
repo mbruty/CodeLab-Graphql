@@ -62,7 +62,7 @@ apply<ReleasePlugin>()
 val exposedVersion = "0.38.2"
 
 group = "net.bruty"
-version = "0.1.2"
+version = "0.2.3"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
