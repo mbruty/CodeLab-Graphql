@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Set up Java 17
         uses: actions/setup-java@v2
         with:
@@ -91,7 +91,7 @@ jobs:
       - name: Log in to GitHub Docker Registry
         uses: docker/login-action@v2.1.0
         with:
-          registry: docker.pkg.github.com
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GH_TOKEN }}
       - name: Lowercase REPO
@@ -104,8 +104,8 @@ jobs:
           push: true
           build-args: JAR_NAME=${{ env.JAR }}
           tags: |
-            docker.pkg.github.com/${{ env.REPO }}/api-image:${{ env.RELEASE }}
-            docker.pkg.github.com/${{ env.REPO }}/api-image:latest
+            ghcr.io/${{ env.REPO }}/api-image:${{ env.RELEASE }}
+            ghcr.io/${{ env.REPO }}/api-image:latest
   version:
     name: Bump Version Number
     needs: build
@@ -113,7 +113,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Download tag
         uses: actions/download-artifact@v3
         with:
