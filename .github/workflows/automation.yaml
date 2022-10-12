@@ -27,6 +27,8 @@ jobs:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
       - name: Run Gradle Release
         run: ./gradlew release
       - name: Upload tag number
