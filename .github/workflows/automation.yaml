@@ -105,6 +105,7 @@ jobs:
           build-args: JAR_NAME=${{ env.JAR }}
           tags: |
             docker.pkg.github.com/${{ env.REPO }}/api-image:${{ env.RELEASE }}
+            docker.pkg.github.com/${{ env.REPO }}/api-image:latest
   version:
     name: Bump Version Number
     needs: build
