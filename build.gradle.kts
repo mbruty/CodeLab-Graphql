@@ -92,9 +92,9 @@ dependencies {
 	// endregion
 
 	// region Metrics
-	implementation("com.netflix.graphql.dgs:graphql-dgs-spring-boot-micrometer")
-	implementation ("io.micrometer:micrometer-registry-prometheus:1.9.4")
-	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	// implementation("com.netflix.graphql.dgs:graphql-dgs-spring-boot-micrometer")
+	// implementation ("io.micrometer:micrometer-registry-prometheus:1.9.4")
+	// implementation("org.springframework.boot:spring-boot-starter-actuator")
 	// endregion
 
 	// region ORM | Jetbrains Exposed
