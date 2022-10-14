@@ -82,7 +82,7 @@ dependencies {
 	// endregion
 
 	// region JWeaver
-	implementation("org.aspectj:aspectjweaver:1.8.12")
+	implementation("org.aspectj:aspectjweaver:1.9.9.1")
 	// endregion
 
 	// region JWT
