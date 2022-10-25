@@ -17,18 +17,25 @@ class ProgrammingTaskRepository: IProgrammingTaskRepository {
     override fun getStarterCodeByLanguage(id: Int, language: String): ProgrammingTask {
         return transaction {
             addLogger(StdOutSqlLogger)
+            val codeSubmission = UserCodeSubmissionTable
+                .select {
+                UserCodeSubmissionTable.createdBy eq (httpCtx.principal!!.userId)
+            }
+                .alias("ucs")
             val x = ProgrammingTaskTable
                 .innerJoin(ProgrammingTaskStarterCodeTable)
                 .innerJoin(LanguageTable, { LanguageTable.id }, { ProgrammingTaskStarterCodeTable.language })
-                .leftJoin(UserCodeSubmissionTable)
-                .leftJoin(UsersTable)
+                .leftJoin(codeSubmission, { codeSubmission[UserCodeSubmissionTable.task] }, { ProgrammingTaskStarterCodeTable.id })
+                .leftJoin(UsersTable, { codeSubmission[UserCodeSubmissionTable.createdBy] }, { UsersTable.id })
                 .select {
-                    ProgrammingTaskTable.id eq id and (LanguageTable.language eq language) and (UsersTable.id eq httpCtx.principal!!.userId or UsersTable.id.isNull())
+                    ProgrammingTaskTable.id eq id and (LanguageTable.language eq language)
                 }.singleOrNull() ?: throw NotFoundException()
 
-            val myCode =
-                if(x[UserCodeSubmissionTable.codeText] == null) x[ProgrammingTaskStarterCodeTable.starterCode]
-                else x[UserCodeSubmissionTable.codeText]
+            var myCode = x[codeSubmission[UserCodeSubmissionTable.codeText]]
+
+            if(myCode == null) {
+                myCode = x[ProgrammingTaskStarterCodeTable.starterCode]
+            }
 
             var task = ProgrammingTask(
                 id = x[ProgrammingTaskTable.id].value.toString() + "." + x[LanguageTable.id],
@@ -51,18 +58,27 @@ class ProgrammingTaskRepository: IProgrammingTaskRepository {
     override fun getStarterCodeDefault(id: Int): ProgrammingTask {
         return transaction {
             addLogger(StdOutSqlLogger)
+            val codeSubmission = UserCodeSubmissionTable
+                .select {
+                    UserCodeSubmissionTable.createdBy eq (httpCtx.principal!!.userId)
+                }
+                .alias("ucs")
 
             val x = ProgrammingTaskTable
                 .innerJoin(ProgrammingTaskStarterCodeTable)
                 .innerJoin(LanguageTable, { LanguageTable.id }, { ProgrammingTaskStarterCodeTable.language })
-                .leftJoin(UserCodeSubmissionTable)
-                .leftJoin(UsersTable)
+                .leftJoin(codeSubmission, { codeSubmission[UserCodeSubmissionTable.task] }, { ProgrammingTaskStarterCodeTable.id })
+                .leftJoin(UsersTable, { codeSubmission[UserCodeSubmissionTable.createdBy] }, { UsersTable.id })
                 .select {
                     (ProgrammingTaskTable.id eq id) and
-                    (ProgrammingTaskTable.defaultLanguage eq ProgrammingTaskStarterCodeTable.language) and
-                    (UsersTable.id eq httpCtx.principal!!.userId or UsersTable.id.isNull())
-                }.singleOrNull() ?: throw NotFoundException()
+                    (ProgrammingTaskTable.defaultLanguage eq ProgrammingTaskStarterCodeTable.language)
+                }
+                .singleOrNull() ?: throw NotFoundException()
+            var myCode = x[codeSubmission[UserCodeSubmissionTable.codeText]]
 
+            if(myCode == null) {
+                myCode = x[ProgrammingTaskStarterCodeTable.starterCode]
+            }
             var task = ProgrammingTask(
                 id = x[ProgrammingTaskTable.id].value.toString() + "." + x[LanguageTable.id],
                 title = x[ProgrammingTaskTable.title],
@@ -70,13 +86,11 @@ class ProgrammingTaskRepository: IProgrammingTaskRepository {
                 starterCode = x[ProgrammingTaskStarterCodeTable.starterCode],
                 testCode = x[ProgrammingTaskStarterCodeTable.unitTestCode],
                 language = x[LanguageTable.language],
-                myCode = x[UserCodeSubmissionTable.codeText],
+                myCode = myCode,
                 availableLanguages = emptyList<String>() // This will be set by a sub-resolver if included
             )
 
-            if(task.myCode == "") {
-                task = task.copy(myCode = task.starterCode)
-            }
+
             return@transaction task;
         }
     }
