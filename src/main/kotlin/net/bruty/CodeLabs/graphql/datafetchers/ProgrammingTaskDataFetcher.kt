@@ -26,6 +26,7 @@ class ProgrammingTaskDataFetcher {
     @DgsData(parentType = "ProgrammingTask")
     fun availableLanguages(dfe: DgsDataFetchingEnvironment): List<String> {
         val task = dfe.getSource<ProgrammingTask>();
-        return programmingTaskRepository.getLanguagesFor(task.id);
+        val id = task.id.split(".")[0].toInt();
+        return programmingTaskRepository.getLanguagesFor(id);
     }
 }

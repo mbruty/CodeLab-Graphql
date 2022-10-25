@@ -26,15 +26,25 @@ class ProgrammingTaskRepository: IProgrammingTaskRepository {
                     ProgrammingTaskTable.id eq id and (LanguageTable.language eq language) and (UsersTable.id eq httpCtx.principal!!.userId or UsersTable.id.isNull())
                 }.singleOrNull() ?: throw NotFoundException()
 
-            ProgrammingTask(
-                id = x[ProgrammingTaskTable.id].value,
+            val myCode =
+                if(x[UserCodeSubmissionTable.codeText] == null) x[ProgrammingTaskStarterCodeTable.starterCode]
+                else x[UserCodeSubmissionTable.codeText]
+
+            var task = ProgrammingTask(
+                id = x[ProgrammingTaskTable.id].value.toString() + "." + x[LanguageTable.id],
                 title = x[ProgrammingTaskTable.title],
                 description = x[ProgrammingTaskTable.description],
                 starterCode = x[ProgrammingTaskStarterCodeTable.starterCode],
                 testCode = x[ProgrammingTaskStarterCodeTable.unitTestCode],
                 language = x[LanguageTable.language],
-                myCode = x[UserCodeSubmissionTable.codeText]
+                myCode = myCode,
+                availableLanguages = emptyList<String>() // This will be set by a sub-resolver if included
             )
+
+            if(task.myCode == "") {
+                task = task.copy(myCode = task.starterCode)
+            }
+            return@transaction task;
         }
     }
 
@@ -48,18 +58,26 @@ class ProgrammingTaskRepository: IProgrammingTaskRepository {
                 .leftJoin(UserCodeSubmissionTable)
                 .leftJoin(UsersTable)
                 .select {
-                    ProgrammingTaskTable.id eq id and (ProgrammingTaskTable.defaultLanguage eq ProgrammingTaskStarterCodeTable.language) and (UsersTable.id eq httpCtx.principal!!.userId or UsersTable.id.isNull())
+                    (ProgrammingTaskTable.id eq id) and
+                    (ProgrammingTaskTable.defaultLanguage eq ProgrammingTaskStarterCodeTable.language) and
+                    (UsersTable.id eq httpCtx.principal!!.userId or UsersTable.id.isNull())
                 }.singleOrNull() ?: throw NotFoundException()
 
-            ProgrammingTask(
-                id = x[ProgrammingTaskTable.id].value,
+            var task = ProgrammingTask(
+                id = x[ProgrammingTaskTable.id].value.toString() + "." + x[LanguageTable.id],
                 title = x[ProgrammingTaskTable.title],
                 description = x[ProgrammingTaskTable.description],
                 starterCode = x[ProgrammingTaskStarterCodeTable.starterCode],
                 testCode = x[ProgrammingTaskStarterCodeTable.unitTestCode],
                 language = x[LanguageTable.language],
-                myCode = x[UserCodeSubmissionTable.codeText]
+                myCode = x[UserCodeSubmissionTable.codeText],
+                availableLanguages = emptyList<String>() // This will be set by a sub-resolver if included
             )
+
+            if(task.myCode == "") {
+                task = task.copy(myCode = task.starterCode)
+            }
+            return@transaction task;
         }
     }
 

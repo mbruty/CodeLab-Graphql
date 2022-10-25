@@ -9,14 +9,20 @@ import org.jetbrains.exposed.sql.ReferenceOption
 
 object UserCodeSubmissionTable: IntIdTable() {
     val codeText: Column<String> = text("code_text");
-    val executionTime: Column<Int> = integer("execution_time");
-    val memoryUsage: Column<String> = text("memory_usage");
+    val executionTime: Column<Int?> = integer("execution_time").nullable();
+    val memoryUsage: Column<String?> = text("memory_usage").nullable();
     val isSubmitted: Column<Boolean> = bool("is_submitted").default(false);
     val hasSharedWithModuleStaff: Column<Boolean> = bool("has_shared_with_module_staff").default(false);
     val hasSharedWithStudents: Column<Boolean> = bool("has_shared_with_students").default(false);
     val createdBy = reference("created_by", UsersTable, ReferenceOption.CASCADE);
     val task = reference("task", ProgrammingTaskTable, ReferenceOption.CASCADE);
     val language = reference("language", LanguageTable, ReferenceOption.CASCADE);
+
+    init {
+        // Add a unique index for:
+        // A user can only have 1 submission for a task in a specific language
+        index(true, createdBy, task, language)
+    }
 }
 
 class UserCodeSubmissionEntity(id: EntityID<Int>): IntEntity(id) {
@@ -27,7 +33,7 @@ class UserCodeSubmissionEntity(id: EntityID<Int>): IntEntity(id) {
     var executionTime by UserCodeSubmissionTable.executionTime
     var memoryUsage by UserCodeSubmissionTable.memoryUsage.transform(
         { a -> a.joinToString(SEPARATOR) },
-        { str -> str.split(SEPARATOR).map { it.toIntOrNull() }.toTypedArray() }
+        { str -> str?.split(SEPARATOR)?.map { it.toIntOrNull() }?.toTypedArray() ?: emptyArray() }
     )
     var isSubmitted by UserCodeSubmissionTable.isSubmitted
     var hasSharedWithModuleStaff by UserCodeSubmissionTable.hasSharedWithModuleStaff
