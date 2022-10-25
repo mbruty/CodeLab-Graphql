@@ -71,7 +71,6 @@ repositories {
 
 dependencies {
 	implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
-
 	// region Bcrypt | hashing
 	implementation("org.mindrot:jbcrypt:0.4")
 	// endregion
@@ -102,6 +101,8 @@ dependencies {
 	implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
 	implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
 	implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+	// Test database
+	testImplementation("com.h2database:h2:1.4.200")
 	// endregion
 
 	// region Postgres driver
@@ -119,6 +120,10 @@ dependencies {
 	// region Spring testing
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.amqp:spring-rabbit-test")
+	// endregion
+
+	// region JUnit
+	testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
 	// endregion
 }
 
