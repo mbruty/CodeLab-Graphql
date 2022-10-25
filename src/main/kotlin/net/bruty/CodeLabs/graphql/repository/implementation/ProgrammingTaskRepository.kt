@@ -5,6 +5,7 @@ import net.bruty.CodeLabs.graphql.model.*
 import net.bruty.CodeLabs.graphql.repository.interfaces.IProgrammingTaskRepository
 import net.bruty.CodeLabs.graphql.security.HttpContext
 import net.bruty.types.ProgrammingTask
+import net.bruty.types.UserCodeSubmission
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,10 +19,16 @@ class ProgrammingTaskRepository: IProgrammingTaskRepository {
         return transaction {
             addLogger(StdOutSqlLogger)
             val codeSubmission = UserCodeSubmissionTable
+                .innerJoin(ProgrammingTaskTable)
+                .innerJoin(LanguageTable, { LanguageTable.id }, { UserCodeSubmissionTable.language })
+                .slice(UserCodeSubmissionTable.id, UserCodeSubmissionTable.codeText, UserCodeSubmissionTable.createdBy, UserCodeSubmissionTable.language, UserCodeSubmissionTable.task)
                 .select {
-                UserCodeSubmissionTable.createdBy eq (httpCtx.principal!!.userId)
-            }
+                    UserCodeSubmissionTable.createdBy eq (httpCtx.principal!!.userId) and
+                            (ProgrammingTaskTable.id eq id) and
+                            (LanguageTable.language eq language )
+                }
                 .alias("ucs")
+
             val x = ProgrammingTaskTable
                 .innerJoin(ProgrammingTaskStarterCodeTable)
                 .innerJoin(LanguageTable, { LanguageTable.id }, { ProgrammingTaskStarterCodeTable.language })
@@ -59,8 +66,12 @@ class ProgrammingTaskRepository: IProgrammingTaskRepository {
         return transaction {
             addLogger(StdOutSqlLogger)
             val codeSubmission = UserCodeSubmissionTable
+                .innerJoin(ProgrammingTaskTable)
+                .slice(UserCodeSubmissionTable.id, UserCodeSubmissionTable.codeText, UserCodeSubmissionTable.createdBy, UserCodeSubmissionTable.language, UserCodeSubmissionTable.task)
                 .select {
-                    UserCodeSubmissionTable.createdBy eq (httpCtx.principal!!.userId)
+                    UserCodeSubmissionTable.createdBy eq (httpCtx.principal!!.userId) and
+                    (ProgrammingTaskTable.id eq id) and
+                    (UserCodeSubmissionTable.language eq ProgrammingTaskTable.defaultLanguage )
                 }
                 .alias("ucs")
 

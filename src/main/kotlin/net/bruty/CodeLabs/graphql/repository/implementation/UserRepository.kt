@@ -5,8 +5,11 @@ import net.bruty.CodeLabs.graphql.model.UserEntity
 import net.bruty.CodeLabs.graphql.model.UsersTable
 import net.bruty.CodeLabs.graphql.repository.interfaces.IUserRepository
 import net.bruty.types.User
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.plus
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpClientErrorException.BadRequest
 
 @Component
 class UserRepository: IUserRepository {
@@ -16,8 +19,12 @@ class UserRepository: IUserRepository {
         }
     }
 
-    override fun logoutAll(user: UserEntity) {
-        TODO("Not yet implemented")
+    override fun logoutAll(id: Int) {
+        transaction {
+            UsersTable.update({ UsersTable.id eq id }) {
+                it[refereshCount] = refereshCount + 1
+            }
+        }
     }
 
     override fun findById(id: Int): UserEntity? {
@@ -33,10 +40,16 @@ class UserRepository: IUserRepository {
     }
 
     override fun findAll(): List<UserEntity> {
-        TODO("Not yet implemented")
+        return transaction {
+            UserEntity.all().toList()
+        }
     }
 
     override fun create(obj: User): UserEntity {
+        val EMAIL_REGEX = "^[A-Za-z](.*)([@]{1})(.{1,})(\\.)(.{1,})";
+        if(!EMAIL_REGEX.toRegex().matches(obj.email)) {
+            throw Exception("Invalid email");
+        }
         return transaction {
             UserEntity.new {
                 email = obj.email

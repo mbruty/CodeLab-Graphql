@@ -66,9 +66,7 @@ class UserDataFetcher {
     @Authenticate
     @DgsMutation
     fun logoutAll(dfe: DgsDataFetchingEnvironment): Boolean {
-        val user = _userRepo.findByIdOrThrow(_ctx.principal!!.userId)
-
-        _userRepo.logoutAll(user)
+        _userRepo.logoutAll(_ctx.principal!!.userId)
 
         _security.logOut(CookieHandlerFactory.getHandler(dfe))
         return true

@@ -17,14 +17,27 @@ class DbUtils {
             )
         }
 
+        fun connectTest() {
+            Database.connect("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", driver = "org.h2.Driver", user = "root", password = "")
+        }
+
         fun createTables() {
             transaction {
-                addLogger(StdOutSqlLogger)
                 SchemaUtils.create(UsersTable)
                 SchemaUtils.create(LanguageTable)
                 SchemaUtils.create(ProgrammingTaskTable)
                 SchemaUtils.create(UserCodeSubmissionTable)
                 SchemaUtils.create(ProgrammingTaskStarterCodeTable)
+            }
+        }
+
+        fun dropTables() {
+            transaction {
+                SchemaUtils.drop(UserCodeSubmissionTable)
+                SchemaUtils.drop(ProgrammingTaskStarterCodeTable)
+                SchemaUtils.drop(ProgrammingTaskTable)
+                SchemaUtils.drop(LanguageTable)
+                SchemaUtils.drop(UsersTable)
             }
         }
     }
