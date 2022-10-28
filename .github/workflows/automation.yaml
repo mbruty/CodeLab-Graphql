@@ -27,6 +27,7 @@ jobs:
         run: ./gradlew test --tests "*"
   build:
     name: Build Jar
+    needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
