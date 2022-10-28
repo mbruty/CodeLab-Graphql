@@ -20,15 +20,21 @@ class UserCodeSubmissionRepository: IUserCodeSubmissionRepository {
     lateinit var httpContext: HttpContext
 
     override fun findById(id: Int): UserCodeSubmissionEntity? {
-        TODO("Not yet implemented")
+        return transaction {
+            UserCodeSubmissionEntity.findById(id)
+        }
     }
 
     override fun findByIdOrThrow(id: Int): UserCodeSubmissionEntity {
-        TODO("Not yet implemented")
+        return transaction {
+            UserCodeSubmissionEntity.findById(id) ?: throw NotFoundException()
+        }
     }
 
     override fun findAll(): List<UserCodeSubmissionEntity> {
-        TODO("Not yet implemented")
+        return transaction {
+            UserCodeSubmissionEntity.all().toList()
+        }
     }
 
     override fun create(obj: UserCodeSubmission): UserCodeSubmissionEntity {
@@ -36,7 +42,7 @@ class UserCodeSubmissionRepository: IUserCodeSubmissionRepository {
     }
 
     override fun update(obj: UserCodeSubmission): UserCodeSubmissionEntity {
-        TODO("Not yet implemented")
+        throw Exception("Use upsert instead")
     }
 
     override fun upsert(obj: UserCodeSubmissionInput) {

@@ -1,4 +1,4 @@
-package net.bruty.CodeLabs.graphql.test.repository.implementation
+package net.bruty.CodeLabs.graphql.repository.implementation
 
 import net.bruty.CodeLabs.graphql.DbUtils
 import net.bruty.CodeLabs.graphql.model.LanguageTable
