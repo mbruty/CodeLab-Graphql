@@ -16,10 +16,10 @@ import javax.crypto.SecretKey
 class Security {
 
     @Autowired
-    private lateinit var _ctx: HttpContext
+    lateinit var _ctx: HttpContext
 
     @Autowired
-    private lateinit var _userRepository: IUserRepository
+    lateinit var _userRepository: IUserRepository
 
     companion object {
         val key: SecretKey = Keys.hmacShaKeyFor("mXa09yfjBDA00ByV7KMsla8dwOt8Q6zyaCEEgxOPGvETh8lpSGuJIdecettPd00lyd7TIevHvUmg4qKflhVJOrqdeFUclikmn2q".toByteArray())
@@ -83,7 +83,9 @@ class Security {
             ObjectMapper().readValue(claims.subject, UserPrincipal::class.java)
         }
         catch (e: ExpiredJwtException) { null }
-        catch (e: Exception) { throw UnauthorisedException() }
+        catch (e: Exception) {
+            throw UnauthorisedException()
+        }
     }
 
     fun getPrincipal(accessToken: String, refreshToken: String, cookieHandler: ICookieHandler): IPrincipal {

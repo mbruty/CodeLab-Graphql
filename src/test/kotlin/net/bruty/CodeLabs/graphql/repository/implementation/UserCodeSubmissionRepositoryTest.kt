@@ -20,32 +20,39 @@ internal class UserCodeSubmissionRepositoryTest {
 
     @BeforeEach
     fun setup() {
-        transaction {
-            _user = UserEntity.new {
+        _user = transaction {
+            UserEntity.new {
                 username = "test"
                 email = "test@test.com"
                 password = "testing123"
                 xp = 0
             }
+        }
 
-            _lang = LanguageEntity.new {
+        _lang = transaction {
+            LanguageEntity.new {
                 language = "test"
                 queueIdentifier = "test"
             }
+        }
 
-            _task = ProgrammingTaskEntity.new {
+        _task = transaction {
+            ProgrammingTaskEntity.new {
                 defaultLanguage = _lang
                 title = "test"
                 description = "test"
             }
+        }
 
-            _submission = UserCodeSubmissionEntity.new {
+        _submission = transaction {
+            UserCodeSubmissionEntity.new {
                 codeText = "test"
                 createdBy = _user
                 task = _task
                 language = _lang
             }
         }
+
         _httpCtx = HttpContext()
         _httpCtx.principal = _user.toPrincipal()
         _repo = UserCodeSubmissionRepository()
@@ -84,9 +91,8 @@ internal class UserCodeSubmissionRepositoryTest {
 
     @Test
     fun upsertWithNewItem() {
-        var language2: LanguageEntity? = null
-        transaction {
-            language2 = LanguageEntity.new {
+        val language2 = transaction {
+            LanguageEntity.new {
                 language = "test2"
                 queueIdentifier = "TEST2"
             }
@@ -95,7 +101,7 @@ internal class UserCodeSubmissionRepositoryTest {
         val args = UserCodeSubmissionInput(
             codeText = "test2",
             taskId = _task.id.value,
-            language = language2!!.language
+            language = language2.language
         )
         _repo.upsert(args)
         assertEquals(2, _repo.findAll().size)

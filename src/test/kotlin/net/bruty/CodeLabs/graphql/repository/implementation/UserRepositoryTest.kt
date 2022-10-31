@@ -16,13 +16,13 @@ internal class UserRepositoryTest {
     private var currentId = -1;
     @BeforeEach
     fun setUp() {
-        transaction {
+        currentId = transaction {
             val created = UserEntity.new {
                 email = "test@test.com"
                 password = "secure_password"
                 username = "test"
             }
-            currentId = created.id.value
+            created.id.value
         }
     }
 
