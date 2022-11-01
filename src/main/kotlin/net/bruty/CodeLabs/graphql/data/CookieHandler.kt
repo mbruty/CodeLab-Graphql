@@ -20,7 +20,7 @@ class CookieHandler : ICookieHandler {
     }
 
     override fun addCookie(name: String, data: String) {
-        _response?.addCookie(Cookie(name, data))
+        _response?.addHeader("Set-Cookie", "$name=$data; HttpOnly; Secure; SameSite=None")
     }
 
     override fun removeCookie(name: String) {
