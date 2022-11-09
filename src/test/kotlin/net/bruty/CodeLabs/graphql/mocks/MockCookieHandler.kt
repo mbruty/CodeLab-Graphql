@@ -8,6 +8,10 @@ class MockCookieHandler: ICookieHandler {
         cookies[name] = data
     }
 
+    override fun getCookie(key: String): String? {
+        return cookies[key]
+    }
+
     override fun removeCookie(name: String) {
         cookies.remove(name)
     }

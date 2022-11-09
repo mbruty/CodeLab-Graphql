@@ -31,12 +31,10 @@ class SecurityAspect {
     @Around("net.bruty.CodeLabs.graphql.security.SecurityAspect.securityAnnotation()")
     fun checkAuth(pjp: ProceedingJoinPoint): Any {
         val req = request
+        val handler = CookieHandlerFactory.getHandler(request);
 
-        if(req.cookies == null) throw UnauthorisedException()
-
-        req.cookies
-        val accessToken: String = req.cookies.find { it.name == "access_token" }?.value ?: throw UnauthorisedException()
-        val refreshToken: String = req.cookies.find { it.name == "refresh_token" }?.value ?: throw UnauthorisedException()
+        val accessToken = handler.getCookie("access_token") ?: throw UnauthorisedException()
+        val refreshToken = handler.getCookie("refresh_token") ?: throw UnauthorisedException()
 
         _ctx.principal = _security.getPrincipal(accessToken, refreshToken, CookieHandlerFactory.getHandler(response))
 

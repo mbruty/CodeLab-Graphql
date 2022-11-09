@@ -82,9 +82,8 @@ class Security {
                 .body
             ObjectMapper().readValue(claims.subject, UserPrincipal::class.java)
         }
-        catch (e: ExpiredJwtException) { null }
         catch (e: Exception) {
-            throw UnauthorisedException()
+            null
         }
     }
 

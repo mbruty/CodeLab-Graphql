@@ -1,6 +1,7 @@
 package net.bruty.CodeLabs.graphql.data
 
 import com.netflix.graphql.dgs.DgsDataFetchingEnvironment
+import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmErasure
@@ -27,6 +28,16 @@ class CookieHandlerFactory {
             }
             // Fall back to concrete implementation
             return CookieHandler(response)
+        }
+
+        fun getHandler(request: HttpServletRequest): ICookieHandler {
+            for (constructor in factoryClass.constructors) {
+                if (constructor.parameters[0].type.jvmErasure == HttpServletRequest::class) {
+                    return constructor.call(request)
+                }
+            }
+            // Fall back to concrete implementation
+            return CookieHandler(request)
         }
     }
 }

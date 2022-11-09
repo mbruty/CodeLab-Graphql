@@ -26,6 +26,7 @@ class UserDataFetcher {
     // endregion
 
     // region queries
+    @Authenticate
     @DgsQuery
     fun authCheck(): Boolean {
         return true
