@@ -13,6 +13,8 @@ object ProgrammingTaskStarterCodeTable: IntIdTable() {
     val starterCode: Column<String> = text("starter_code")
     val language = reference("language", LanguageTable)
     val task = reference("task", ProgrammingTaskTable, ReferenceOption.CASCADE)
+    val includedFiles: Column<String> = text("included_files")
+    val fileName: Column<String> = varchar("file_name", 25)
 }
 class ProgrammingTaskStarterCodeEntity(id: EntityID<Int>): IntEntity(id) {
     companion object : IntEntityClass<ProgrammingTaskStarterCodeEntity>(ProgrammingTaskStarterCodeTable)
@@ -21,4 +23,6 @@ class ProgrammingTaskStarterCodeEntity(id: EntityID<Int>): IntEntity(id) {
     var starterCode by ProgrammingTaskStarterCodeTable.starterCode
     var language by LanguageEntity referencedOn ProgrammingTaskStarterCodeTable.language
     var task by ProgrammingTaskEntity referencedOn ProgrammingTaskStarterCodeTable.task
+    var includedFiles by ProgrammingTaskStarterCodeTable.includedFiles
+    val fileName by ProgrammingTaskStarterCodeTable.fileName
 }

@@ -12,6 +12,7 @@ import kotlinx.serialization.json.encodeToJsonElement
 import net.bruty.CodeLabs.graphql.annotations.Authenticate
 import net.bruty.CodeLabs.graphql.data.CodeData
 import net.bruty.CodeLabs.graphql.data.CodeResponse
+import net.bruty.CodeLabs.graphql.exceptions.NotFoundException
 import net.bruty.CodeLabs.graphql.exceptions.UnauthorisedException
 import net.bruty.CodeLabs.graphql.repository.interfaces.ILanguageRepository
 import net.bruty.CodeLabs.graphql.repository.interfaces.IProgrammingTaskRepository
@@ -24,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import org.springframework.web.client.HttpClientErrorException.BadRequest
 import org.springframework.web.client.RestTemplate
 
 
@@ -45,12 +47,13 @@ class CodeDataFetcher {
     lateinit var codeRepository: IUserCodeSubmissionRepository
 
     @DgsQuery
+    @Authenticate   
     fun evaluate(code: String, language: String, taskId: Int): CodeResponse? {
         CoroutineScope(Dispatchers.Default).launch {
             spinUpContainer(language);
         }
         val task = programmingTaskRepository.getStarterCodeByLanguage(taskId, language);
-        val data = CodeData(code = code, test = task.testCode);
+        val data = CodeData(code = code, test = task.testCode ?: throw NotFoundException(), file = task.includedFiles, file_name = task.fileName);
         val queue = languageRepository.getQueueNameByLanguage(language);
         val dataStr = Json.encodeToJsonElement(data).toString();
         val response = template.sendAndReceive(exchange.name, queue, Message(dataStr.toByteArray()));
