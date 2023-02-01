@@ -24,7 +24,7 @@ class UserEntity(id: EntityID<Int>): IntEntity(id) {
     var username by UsersTable.username
     var xp by UsersTable.xp
     val taskSubmissions by UserCodeSubmissionEntity referrersOn UserCodeSubmissionTable.createdBy
-
+    val timeLogs by UserTimeLogEntity referrersOn UserTimeLogTable.user
     private var _password by UsersTable.password
 
     var password: String
@@ -38,7 +38,7 @@ class UserEntity(id: EntityID<Int>): IntEntity(id) {
     var refreshCount by UsersTable.refereshCount
 
     fun toModel(): User {
-        return User(id.value, email, username, password, refreshCount, xp)
+        return User(id.value, email, username, password = "REDACTED", refreshCount, xp)
     }
 
     fun verifyHash(password: String): Boolean {

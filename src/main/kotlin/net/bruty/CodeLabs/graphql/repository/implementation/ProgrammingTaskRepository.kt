@@ -5,7 +5,6 @@ import net.bruty.CodeLabs.graphql.model.*
 import net.bruty.CodeLabs.graphql.repository.interfaces.IProgrammingTaskRepository
 import net.bruty.CodeLabs.graphql.security.HttpContext
 import net.bruty.types.ProgrammingTask
-import net.bruty.types.UserCodeSubmission
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.beans.factory.annotation.Autowired
@@ -52,7 +51,10 @@ class ProgrammingTaskRepository: IProgrammingTaskRepository {
                 testCode = x[ProgrammingTaskStarterCodeTable.unitTestCode],
                 language = x[LanguageTable.language],
                 myCode = myCode,
+                fileName = x[ProgrammingTaskStarterCodeTable.fileName],
+                includedFiles = x[ProgrammingTaskStarterCodeTable.includedFiles],
                 availableLanguages = emptyList<String>() // This will be set by a sub-resolver if included
+
             )
 
             if(task.myCode == "") {
@@ -67,30 +69,41 @@ class ProgrammingTaskRepository: IProgrammingTaskRepository {
             addLogger(StdOutSqlLogger)
             val codeSubmission = UserCodeSubmissionTable
                 .innerJoin(ProgrammingTaskTable)
-                .slice(UserCodeSubmissionTable.id, UserCodeSubmissionTable.codeText, UserCodeSubmissionTable.createdBy, UserCodeSubmissionTable.language, UserCodeSubmissionTable.task)
+                .slice(
+                    UserCodeSubmissionTable.id,
+                    UserCodeSubmissionTable.codeText,
+                    UserCodeSubmissionTable.createdBy,
+                    UserCodeSubmissionTable.language,
+                    UserCodeSubmissionTable.task
+                )
                 .select {
                     UserCodeSubmissionTable.createdBy eq (httpCtx.principal!!.userId) and
-                    (ProgrammingTaskTable.id eq id) and
-                    (UserCodeSubmissionTable.language eq ProgrammingTaskTable.defaultLanguage )
+                            (ProgrammingTaskTable.id eq id) and
+                            (UserCodeSubmissionTable.language eq ProgrammingTaskTable.defaultLanguage)
                 }
                 .alias("ucs")
 
             val x = ProgrammingTaskTable
                 .innerJoin(ProgrammingTaskStarterCodeTable)
                 .innerJoin(LanguageTable, { LanguageTable.id }, { ProgrammingTaskStarterCodeTable.language })
-                .leftJoin(codeSubmission, { codeSubmission[UserCodeSubmissionTable.task] }, { ProgrammingTaskStarterCodeTable.id })
+                .leftJoin(
+                    codeSubmission,
+                    { codeSubmission[UserCodeSubmissionTable.task] },
+                    { ProgrammingTaskStarterCodeTable.id })
                 .leftJoin(UsersTable, { codeSubmission[UserCodeSubmissionTable.createdBy] }, { UsersTable.id })
                 .select {
                     (ProgrammingTaskTable.id eq id) and
-                    (ProgrammingTaskTable.defaultLanguage eq ProgrammingTaskStarterCodeTable.language)
+                            (ProgrammingTaskTable.defaultLanguage eq ProgrammingTaskStarterCodeTable.language)
                 }
                 .singleOrNull() ?: throw NotFoundException()
             var myCode = x[codeSubmission[UserCodeSubmissionTable.codeText]]
 
-            if(myCode == null) {
+            if (myCode == null) {
                 myCode = x[ProgrammingTaskStarterCodeTable.starterCode]
             }
-            var task = ProgrammingTask(
+
+
+            return@transaction ProgrammingTask(
                 id = x[ProgrammingTaskTable.id].value.toString() + "." + x[LanguageTable.id],
                 title = x[ProgrammingTaskTable.title],
                 description = x[ProgrammingTaskTable.description],
@@ -99,10 +112,7 @@ class ProgrammingTaskRepository: IProgrammingTaskRepository {
                 language = x[LanguageTable.language],
                 myCode = myCode,
                 availableLanguages = emptyList<String>() // This will be set by a sub-resolver if included
-            )
-
-
-            return@transaction task;
+            );
         }
     }
 

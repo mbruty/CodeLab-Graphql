@@ -4,6 +4,8 @@ type Query {
     authCheck: Boolean
     evaluate(code: String!, language: String!, taskId: Int!): CodeResponse!
     me: User!
+    module(moduleId: Int!): Module!
+    myModules: [Module]!
     programmingTask(taskId: Int!, language: String!): ProgrammingTask!
 }
 
@@ -19,6 +21,8 @@ input UserCodeSubmissionInput {
 }
 
 type Mutation {
+    createModule(moduleTitle: String!, moduleDescription: String!): Boolean!
+    linkModuleTask(moduleID: ID!, taskID: ID!): Boolean!
     login(email: String!, password: String!): User
     logout: Boolean
     logoutAll: Boolean
@@ -32,6 +36,15 @@ type CodeResponse {
     errorText: String
     executionTimeMS: Long!
     isSuccessful: Boolean!
+}
+
+type Module {
+    id: ID!
+    title: String!
+    description: String!
+    tasks: [ProgrammingTask]
+    createdBy: User
+    completedPct: Float!
 }
 
 type Stat {
@@ -52,11 +65,13 @@ type ProgrammingTask {
     id: ID!
     title: String!
     description: String!
-    starterCode: String!
-    testCode: String!
-    language: String!
-    availableLanguages: [String]!
-    myCode: String!
+    starterCode: String
+    testCode: String
+    language: String
+    availableLanguages: [String]
+    myCode: String
+    includedFiles: String
+    fileName: String
 }
 
 type UserCodeSubmission {

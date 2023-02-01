@@ -1,5 +1,6 @@
 package net.bruty.CodeLabs.graphql.model
 
+import net.bruty.types.ProgrammingTask
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID

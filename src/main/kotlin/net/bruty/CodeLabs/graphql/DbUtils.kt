@@ -24,7 +24,11 @@ class DbUtils {
         fun createTables() {
             transaction {
                 SchemaUtils.create(UsersTable)
+                SchemaUtils.create(ModuleTable)
                 SchemaUtils.create(LanguageTable)
+                SchemaUtils.create(ModuleTaskTable)
+                SchemaUtils.create(UserModuleTable)
+                SchemaUtils.create(UserTimeLogTable)
                 SchemaUtils.create(ProgrammingTaskTable)
                 SchemaUtils.create(UserCodeSubmissionTable)
                 SchemaUtils.create(ProgrammingTaskStarterCodeTable)
@@ -241,7 +245,10 @@ class DbUtils {
                 SchemaUtils.drop(UserCodeSubmissionTable)
                 SchemaUtils.drop(ProgrammingTaskStarterCodeTable)
                 SchemaUtils.drop(ProgrammingTaskTable)
+                SchemaUtils.drop(UserModuleTable)
+                SchemaUtils.drop(ModuleTaskTable)
                 SchemaUtils.drop(LanguageTable)
+                SchemaUtils.drop(ModuleTable)
                 SchemaUtils.drop(UsersTable)
             }
         }
