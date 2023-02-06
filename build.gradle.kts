@@ -128,6 +128,10 @@ dependencies {
 	// region JUnit
 	testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
 	// endregion
+
+	// region Redis
+	implementation("org.springframework.data:spring-data-redis:2.3.3.RELEASE")
+	implementation("redis.clients:jedis:3.3.0")
 }
 
 plugins {
