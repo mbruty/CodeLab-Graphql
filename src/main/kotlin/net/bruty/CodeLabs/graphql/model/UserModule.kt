@@ -9,7 +9,7 @@ import org.jetbrains.exposed.sql.ReferenceOption
 
 object UserModuleTable: IntIdTable() {
     val module = reference("module", ModuleTable, ReferenceOption.CASCADE)
-    val user = reference("task", ProgrammingTaskTable, ReferenceOption.CASCADE)
+    val user = reference("user", UsersTable, ReferenceOption.CASCADE)
 
     init {
         // Add a unique index for:

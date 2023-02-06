@@ -25,6 +25,7 @@ class UserEntity(id: EntityID<Int>): IntEntity(id) {
     var xp by UsersTable.xp
     val taskSubmissions by UserCodeSubmissionEntity referrersOn UserCodeSubmissionTable.createdBy
     val timeLogs by UserTimeLogEntity referrersOn UserTimeLogTable.user
+    val modules by ModuleEntity via UserModuleTable
     private var _password by UsersTable.password
 
     var password: String

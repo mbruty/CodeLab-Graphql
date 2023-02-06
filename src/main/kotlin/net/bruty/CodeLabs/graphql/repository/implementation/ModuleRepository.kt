@@ -107,7 +107,8 @@ class ModuleRepository: IModuleRepository {
 
     override fun findEnrolled(userId: Int): List<Module> {
         return transaction {
-            emptyList()
+            val user = UserEntity.findById(userId) ?: throw UnauthorisedException();
+            user.modules.toList().map { it.toDTO() }
         }
     }
 

@@ -19,4 +19,12 @@ class ProgrammingTaskEntity(id: EntityID<Int>): IntEntity(id) {
     val startCodes by ProgrammingTaskStarterCodeEntity referrersOn ProgrammingTaskStarterCodeTable.task
     val userSubmissions by UserCodeSubmissionEntity referrersOn UserCodeSubmissionTable.task
     var defaultLanguage by LanguageEntity referencedOn ProgrammingTaskTable.defaultLanguage
+
+    fun toDTO(): ProgrammingTask {
+        return ProgrammingTask (
+            id = this.id.value.toString(),
+            title = this.title,
+            description = this.description,
+        );
+    }
 }
