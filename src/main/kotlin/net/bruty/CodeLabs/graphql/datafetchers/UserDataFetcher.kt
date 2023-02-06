@@ -3,6 +3,7 @@ package net.bruty.CodeLabs.graphql.datafetchers
 import com.netflix.graphql.dgs.*
 import net.bruty.CodeLabs.graphql.annotations.Authenticate
 import net.bruty.CodeLabs.graphql.data.CookieHandlerFactory
+import net.bruty.CodeLabs.graphql.exceptions.AlreadyExistsException
 import net.bruty.CodeLabs.graphql.exceptions.NotFoundException
 import net.bruty.CodeLabs.graphql.exceptions.UnauthorisedException
 import net.bruty.CodeLabs.graphql.repository.interfaces.IUserRepository
@@ -81,11 +82,15 @@ class UserDataFetcher {
         dfe: DgsDataFetchingEnvironment
     ): User {
         val user = User(email = email, username = username, password = password, refreshCount = 0, xp = 0)
-        val created = _userRepo.create(user)
+        try {
+            val created = _userRepo.create(user)
+            _security.setTokens(created.toPrincipal(), CookieHandlerFactory.getHandler(dfe))
+            return created.toModel()
 
-        _security.setTokens(created.toPrincipal(), CookieHandlerFactory.getHandler(dfe))
-
-        return created.toModel()
+        } catch (e: Exception) {
+            // This can only throw an error with inserting in to the SQL db
+            throw AlreadyExistsException();
+        }
     }
     // endregion
 
