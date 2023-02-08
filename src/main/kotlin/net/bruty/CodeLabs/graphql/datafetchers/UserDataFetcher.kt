@@ -6,10 +6,13 @@ import net.bruty.CodeLabs.graphql.data.CookieHandlerFactory
 import net.bruty.CodeLabs.graphql.exceptions.AlreadyExistsException
 import net.bruty.CodeLabs.graphql.exceptions.NotFoundException
 import net.bruty.CodeLabs.graphql.exceptions.UnauthorisedException
+import net.bruty.CodeLabs.graphql.model.UserModuleTable
 import net.bruty.CodeLabs.graphql.repository.interfaces.IUserRepository
 import net.bruty.CodeLabs.graphql.security.HttpContext
 import net.bruty.CodeLabs.graphql.security.Security
 import net.bruty.types.User
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.beans.factory.annotation.Autowired
 
 @DgsComponent
@@ -85,6 +88,12 @@ class UserDataFetcher {
         try {
             val created = _userRepo.create(user)
             _security.setTokens(created.toPrincipal(), CookieHandlerFactory.getHandler(dfe))
+            transaction {
+                UserModuleTable.insert {
+                    it[UserModuleTable.user] = created.id
+                    it[module] = 2
+                }
+            }
             return created.toModel()
 
         } catch (e: Exception) {
