@@ -2,6 +2,7 @@ package net.bruty.CodeLabs.graphql
 
 import net.bruty.CodeLabs.graphql.security.HttpContext
 import org.springframework.amqp.core.DirectExchange
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.connection.RedisPassword
@@ -17,6 +18,8 @@ import java.time.Duration
 
 @Configuration
 class AppConfig: WebMvcConfigurer {
+    @Value("\${production}")
+    private val production: String? = null
     @Bean
     @RequestScope
     fun httpContext(): HttpContext {
@@ -49,8 +52,9 @@ class AppConfig: WebMvcConfigurer {
     }
 
     override fun addCorsMappings(registry: CorsRegistry) {
+        println("Using configuration production: $production")
         registry.addMapping("/**")
-            .allowedOrigins("http://localhost:3000/", "http://code-lab.bruty.net/")
+            .allowedOrigins(if (production == "true") "http://code-lab.bruty.net/" else "http://localhost:3000")
             .allowCredentials(true)
     }
 
