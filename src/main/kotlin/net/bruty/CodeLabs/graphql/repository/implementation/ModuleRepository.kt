@@ -8,6 +8,7 @@ import net.bruty.CodeLabs.graphql.repository.interfaces.IModuleRepository
 import net.bruty.types.Module
 import net.bruty.types.ProgrammingTask
 import net.bruty.types.User
+import org.jetbrains.exposed.dao.with
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -125,7 +126,9 @@ class ModuleRepository: IModuleRepository {
     }
 
     override fun findAll(): List<ModuleEntity> {
-        return transaction { ModuleEntity.all().toList() }
+        return transaction {
+            ModuleEntity.all().with(ModuleEntity::tasks).toList()
+        }
     }
 
     override fun create(obj: Module): ModuleEntity {
