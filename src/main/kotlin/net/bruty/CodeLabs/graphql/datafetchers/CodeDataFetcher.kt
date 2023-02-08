@@ -54,9 +54,14 @@ class CodeDataFetcher {
 
         val queue = languageRepository.getQueueNameByLanguage(language);
         val dataStr = Json.encodeToJsonElement(data).toString();
+        // The task shouldn't run for more than 10 seconds, and a build shouldn't take more than 10 seconds.
+        // Then allow 10 seconds in the queue
+        // So timeout after 30 seconds
+        template.setReplyTimeout(30_000);
         val response = template.sendAndReceive(exchange.name, queue, Message(dataStr.toByteArray()));
         val body = response?.body ?: return null
-        if (String(body) == "Max retry hit") {
+        val strBody = String(body)
+        if (strBody == "Max retry hit") {
             return CodeResponse(
                 errorText = "The code failed to execute 3 times without providing an error.",
                 isSuccessful = false,
@@ -65,7 +70,17 @@ class CodeDataFetcher {
                 stats = emptyList()
             );
         }
-        val res = Json.decodeFromString<CodeResponse>(String(body));
+
+        if (strBody.contains("Process timed out"))  {
+            return CodeResponse(
+                errorText = strBody,
+                isSuccessful = false,
+                executionTimeMS = 0,
+                output = strBody,
+                stats = emptyList()
+            );
+        }
+        val res = Json.decodeFromString<CodeResponse>(strBody);
         return res;
     }
 
