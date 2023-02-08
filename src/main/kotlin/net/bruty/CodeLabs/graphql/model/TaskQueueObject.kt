@@ -7,4 +7,4 @@ import org.springframework.data.redis.core.RedisHash
 
 @RedisHash("Task")
 @Serializable
-data class TaskQueueObject (val id: String, val retryCount: Int);
+data class TaskQueueObject (val id: String, val retryCount: Int, val failureReason: String = "none");
