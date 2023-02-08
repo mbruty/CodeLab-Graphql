@@ -52,9 +52,10 @@ class AppConfig: WebMvcConfigurer {
     }
 
     override fun addCorsMappings(registry: CorsRegistry) {
-        println("Using configuration production: $production")
+        val origin = if (production == "true") "http://code-lab.bruty.net" else "http://localhost:3000";
+        println("Using origin: $origin")
         registry.addMapping("/**")
-            .allowedOrigins(if (production == "true") "http://code-lab.bruty.net/" else "http://localhost:3000")
+            .allowedOrigins(origin)
             .allowCredentials(true)
     }
 
