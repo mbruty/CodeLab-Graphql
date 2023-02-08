@@ -244,6 +244,8 @@ class DbUtils {
             transaction {
                 SchemaUtils.drop(UserCodeSubmissionTable)
                 SchemaUtils.drop(ProgrammingTaskStarterCodeTable)
+                SchemaUtils.drop(ModuleTaskTable)
+                SchemaUtils.drop(UserTimeLogTable)
                 SchemaUtils.drop(ProgrammingTaskTable)
                 SchemaUtils.drop(UserModuleTable)
                 SchemaUtils.drop(ModuleTaskTable)
