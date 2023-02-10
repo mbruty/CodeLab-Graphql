@@ -67,6 +67,7 @@ class CodeDataFetcher {
                 isSuccessful = false,
                 executionTimeMS = 0,
                 output = "The code failed to execute 3 times without providing an error.",
+                consoleOutput = "",
                 stats = emptyList()
             );
         }
@@ -77,6 +78,7 @@ class CodeDataFetcher {
                 isSuccessful = false,
                 executionTimeMS = 0,
                 output = strBody,
+                consoleOutput = "",
                 stats = emptyList()
             );
         }

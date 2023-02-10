@@ -5,6 +5,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CodeResponse(
+    @SerialName("console_output")
+    val consoleOutput: String,
     val output: String,
     val stats: List<Stat>,
 
