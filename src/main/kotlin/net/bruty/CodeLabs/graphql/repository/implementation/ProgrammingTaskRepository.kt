@@ -31,7 +31,7 @@ class ProgrammingTaskRepository: IProgrammingTaskRepository {
             val x = ProgrammingTaskTable
                 .innerJoin(ProgrammingTaskStarterCodeTable)
                 .innerJoin(LanguageTable, { LanguageTable.id }, { ProgrammingTaskStarterCodeTable.language })
-                .leftJoin(codeSubmission, { codeSubmission[UserCodeSubmissionTable.task] }, { ProgrammingTaskStarterCodeTable.id })
+                .leftJoin(codeSubmission, { codeSubmission[UserCodeSubmissionTable.task] }, { ProgrammingTaskTable.id })
                 .leftJoin(UsersTable, { codeSubmission[UserCodeSubmissionTable.createdBy] }, { UsersTable.id })
                 .select {
                     ProgrammingTaskTable.id eq id and (LanguageTable.language eq language)
@@ -89,7 +89,7 @@ class ProgrammingTaskRepository: IProgrammingTaskRepository {
                 .leftJoin(
                     codeSubmission,
                     { codeSubmission[UserCodeSubmissionTable.task] },
-                    { ProgrammingTaskStarterCodeTable.id })
+                    { ProgrammingTaskTable.id })
                 .leftJoin(UsersTable, { codeSubmission[UserCodeSubmissionTable.createdBy] }, { UsersTable.id })
                 .select {
                     (ProgrammingTaskTable.id eq id) and
