@@ -53,7 +53,7 @@ class UserCodeSubmissionRepository: IUserCodeSubmissionRepository {
                 .innerJoin(UsersTable)
                 .innerJoin(LanguageTable)
                 .innerJoin(ProgrammingTaskStarterCodeTable)
-                .innerJoin(ProgrammingTaskTable, { ProgrammingTaskTable.id }, { ProgrammingTaskStarterCodeTable.task } )
+                .innerJoin(ProgrammingTaskTable, { ProgrammingTaskTable.id }, { UserCodeSubmissionTable.task } )
                 .slice(UserCodeSubmissionTable.id, LanguageTable.id)
                 .select {
                     (UsersTable.id eq userId) and
