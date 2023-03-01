@@ -3,12 +3,14 @@ package net.bruty.CodeLabs.graphql.datafetchers
 import com.netflix.graphql.dgs.*
 import net.bruty.CodeLabs.graphql.annotations.Authenticate
 import net.bruty.CodeLabs.graphql.exceptions.UnauthorisedException
+import net.bruty.CodeLabs.graphql.model.ModuleEntity
 import net.bruty.CodeLabs.graphql.repository.interfaces.IModuleRepository
 import net.bruty.CodeLabs.graphql.repository.interfaces.IUserRepository
 import net.bruty.CodeLabs.graphql.security.HttpContext
 import net.bruty.types.Module
 import net.bruty.types.ProgrammingTask
 import net.bruty.types.User
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.beans.factory.annotation.Autowired
 
 @DgsComponent
@@ -59,6 +61,17 @@ class ModuleDataFetcher {
         val userID = httpContext.principal?.userId ?: throw UnauthorisedException();
         val module = dfe.getSource<Module>();
         return moduleRepository.getCompletedPct(module.id.toInt(), userID)
+    }
+
+    @DgsData(parentType = "Module")
+    @Authenticate
+    fun canEdit(dfe: DgsDataFetchingEnvironment): Boolean {
+        val userID = httpContext.principal?.userId ?: throw UnauthorisedException();
+        val module = dfe.getSource<Module>();
+        return transaction {
+            val m = ModuleEntity.findById(module.id.toInt());
+            return@transaction m?.createdBy?.id?.value == userID;
+        }
     }
 
     @DgsMutation
