@@ -1,10 +1,13 @@
 package net.bruty.CodeLabs.graphql.repository.implementation
 
 import net.bruty.CodeLabs.graphql.exceptions.NotFoundException
+import net.bruty.CodeLabs.graphql.exceptions.UnauthorisedException
+import net.bruty.CodeLabs.graphql.extensions.toUUID
 import net.bruty.CodeLabs.graphql.model.*
 import net.bruty.CodeLabs.graphql.repository.interfaces.IProgrammingTaskRepository
 import net.bruty.CodeLabs.graphql.security.HttpContext
 import net.bruty.types.ProgrammingTask
+import net.bruty.types.ProgrammingTaskCode
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,109 +17,39 @@ import org.springframework.stereotype.Component
 class ProgrammingTaskRepository: IProgrammingTaskRepository {
     @Autowired
     lateinit var httpCtx: HttpContext;
-    override fun getStarterCodeByLanguage(id: Int, language: String): ProgrammingTask {
+    override fun getStarterCodeByLanguage(id: String, language: String): ProgrammingTask {
         return transaction {
             addLogger(StdOutSqlLogger)
-            val codeSubmission = UserCodeSubmissionTable
-                .innerJoin(ProgrammingTaskTable)
-                .innerJoin(LanguageTable, { LanguageTable.id }, { UserCodeSubmissionTable.language })
-                .slice(UserCodeSubmissionTable.id, UserCodeSubmissionTable.codeText, UserCodeSubmissionTable.createdBy, UserCodeSubmissionTable.language, UserCodeSubmissionTable.task)
-                .select {
-                    UserCodeSubmissionTable.createdBy eq (httpCtx.principal!!.userId) and
-                            (ProgrammingTaskTable.id eq id) and
-                            (LanguageTable.language eq language )
-                }
-                .alias("ucs")
-
-            val x = ProgrammingTaskTable
-                .innerJoin(ProgrammingTaskStarterCodeTable)
-                .innerJoin(LanguageTable, { LanguageTable.id }, { ProgrammingTaskStarterCodeTable.language })
-                .leftJoin(codeSubmission, { codeSubmission[UserCodeSubmissionTable.task] }, { ProgrammingTaskTable.id })
-                .leftJoin(UsersTable, { codeSubmission[UserCodeSubmissionTable.createdBy] }, { UsersTable.id })
-                .select {
-                    ProgrammingTaskTable.id eq id and (LanguageTable.language eq language)
-                }.singleOrNull() ?: throw NotFoundException()
-
-            var myCode = x[codeSubmission[UserCodeSubmissionTable.codeText]]
-
-            if(myCode == null) {
-                myCode = x[ProgrammingTaskStarterCodeTable.starterCode]
+            val language = LanguageEntity.find { LanguageTable.language eq language }.firstOrNull() ?: throw NotFoundException()
+            val task = ProgrammingTaskEntity.findById(id.toUUID()) ?: throw NotFoundException()
+            val code = task.startCodes.firstOrNull { it.language == language } ?: throw NotFoundException()
+            val myCode = task.userSubmissions.firstOrNull {
+                it.createdBy.id.value == (httpCtx.principal?.userUUID ?: throw UnauthorisedException())
             }
-
-            var task = ProgrammingTask(
-                id = x[ProgrammingTaskTable.id].value.toString() + "." + x[LanguageTable.id],
-                title = x[ProgrammingTaskTable.title],
-                description = x[ProgrammingTaskTable.description],
-                starterCode = x[ProgrammingTaskStarterCodeTable.starterCode],
-                testCode = x[ProgrammingTaskStarterCodeTable.unitTestCode],
-                language = x[LanguageTable.language],
-                myCode = myCode,
-                fileName = x[ProgrammingTaskStarterCodeTable.fileName],
-                includedFiles = x[ProgrammingTaskStarterCodeTable.includedFiles],
-                availableLanguages = emptyList<String>() // This will be set by a sub-resolver if included
-
+            ProgrammingTask(
+                id = task.id.toString(),
+                description = task.description,
+                title = task.title,
+                code = ProgrammingTaskCode(
+                    starterCode = code.starterCode,
+                    testCode = code.unitTestCode,
+                    myCode = myCode?.codeText ?: code.starterCode,
+                    language = language.language
+                ),
+                files = task.files.toList().map { it.toDTO() }
             )
-
-            if(task.myCode == "") {
-                task = task.copy(myCode = task.starterCode)
-            }
-            return@transaction task;
         }
     }
 
-    override fun getStarterCodeDefault(id: Int): ProgrammingTask {
-        return transaction {
-            addLogger(StdOutSqlLogger)
-            val codeSubmission = UserCodeSubmissionTable
-                .innerJoin(ProgrammingTaskTable)
-                .slice(
-                    UserCodeSubmissionTable.id,
-                    UserCodeSubmissionTable.codeText,
-                    UserCodeSubmissionTable.createdBy,
-                    UserCodeSubmissionTable.language,
-                    UserCodeSubmissionTable.task
-                )
-                .select {
-                    UserCodeSubmissionTable.createdBy eq (httpCtx.principal!!.userId) and
-                            (ProgrammingTaskTable.id eq id) and
-                            (UserCodeSubmissionTable.language eq ProgrammingTaskTable.defaultLanguage)
-                }
-                .alias("ucs")
-
-            val x = ProgrammingTaskTable
-                .innerJoin(ProgrammingTaskStarterCodeTable)
-                .innerJoin(LanguageTable, { LanguageTable.id }, { ProgrammingTaskStarterCodeTable.language })
-                .leftJoin(
-                    codeSubmission,
-                    { codeSubmission[UserCodeSubmissionTable.task] },
-                    { ProgrammingTaskTable.id })
-                .leftJoin(UsersTable, { codeSubmission[UserCodeSubmissionTable.createdBy] }, { UsersTable.id })
-                .select {
-                    (ProgrammingTaskTable.id eq id) and
-                            (ProgrammingTaskTable.defaultLanguage eq ProgrammingTaskStarterCodeTable.language)
-                }
-                .singleOrNull() ?: throw NotFoundException()
-            var myCode = x[codeSubmission[UserCodeSubmissionTable.codeText]]
-
-            if (myCode == null) {
-                myCode = x[ProgrammingTaskStarterCodeTable.starterCode]
-            }
-
-
-            return@transaction ProgrammingTask(
-                id = x[ProgrammingTaskTable.id].value.toString() + "." + x[LanguageTable.id],
-                title = x[ProgrammingTaskTable.title],
-                description = x[ProgrammingTaskTable.description],
-                starterCode = x[ProgrammingTaskStarterCodeTable.starterCode],
-                testCode = x[ProgrammingTaskStarterCodeTable.unitTestCode],
-                language = x[LanguageTable.language],
-                myCode = myCode,
-                availableLanguages = emptyList<String>() // This will be set by a sub-resolver if included
-            );
-        }
+    override fun getStarterCodeDefault(id: String): ProgrammingTask {
+        val language = transaction {
+            val task = ProgrammingTaskEntity.findById(id.toUUID()) ?: throw NotFoundException()
+            task.defaultLanguage
+        };
+        return getStarterCodeByLanguage(id, language.language)
     }
 
-    override fun getLanguagesFor(id: Int): List<String> {
+    override fun getLanguagesFor(id: String): List<String> {
         return transaction {
             addLogger(StdOutSqlLogger);
             ProgrammingTaskTable
@@ -124,20 +57,21 @@ class ProgrammingTaskRepository: IProgrammingTaskRepository {
                 .innerJoin(LanguageTable, { LanguageTable.id }, { ProgrammingTaskStarterCodeTable.language })
                 .slice(LanguageTable.language, ProgrammingTaskTable.id, ProgrammingTaskStarterCodeTable.id)
                 .select {
-                    ProgrammingTaskTable.id eq id
+                    ProgrammingTaskTable.id eq id.toUUID()
                 }.withDistinct().map { it[LanguageTable.language] }
         }
     }
 
-    override fun findById(id: Int): ProgrammingTaskEntity? {
+    override fun findById(id: String): ProgrammingTaskEntity? {
         return transaction {
-            ProgrammingTaskEntity.findById(id)
+            ProgrammingTaskEntity.findById(id.toUUID())
         }
     }
 
-    override fun findByIdOrThrow(id: Int): ProgrammingTaskEntity {
+    override fun findByIdOrThrow(id: String): ProgrammingTaskEntity {
         return transaction {
-            ProgrammingTaskEntity.findById(id) ?: throw NotFoundException()
+            addLogger(StdOutSqlLogger)
+            ProgrammingTaskEntity.findById(id.toUUID()) ?: throw NotFoundException()
         }
     }
 

@@ -9,6 +9,7 @@ import kotlinx.serialization.json.encodeToJsonElement
 import net.bruty.CodeLabs.graphql.annotations.Authenticate
 import net.bruty.CodeLabs.graphql.data.CodeData
 import net.bruty.CodeLabs.graphql.data.CodeResponse
+import net.bruty.CodeLabs.graphql.data.File
 import net.bruty.CodeLabs.graphql.exceptions.NotFoundException
 import net.bruty.CodeLabs.graphql.exceptions.UnauthorisedException
 import net.bruty.CodeLabs.graphql.model.TaskQueueObject
@@ -44,11 +45,30 @@ class CodeDataFetcher {
     lateinit var taskRepository: TaskRepository
 
     @DgsQuery
-    @Authenticate
-    fun evaluate(code: String, language: String, taskId: Int): CodeResponse? {
-        val task = programmingTaskRepository.getStarterCodeByLanguage(taskId, language);
-        val data = CodeData(id = UUID.randomUUID().toString(), code = code, test = task.testCode ?: throw NotFoundException(), file = task.includedFiles, file_name = task.fileName);
+    fun evaluateTest(code: String, testCode: String, language: String, files: List<File>): CodeResponse? {
+        val data = CodeData(
+            id = UUID.randomUUID().toString(),
+            code = code, test = testCode,
+            files
+        );
 
+        return executeCode(data, language);
+    }
+    @DgsQuery
+    @Authenticate
+    fun evaluate(code: String, language: String, taskId: String): CodeResponse? {
+        val task = programmingTaskRepository.getStarterCodeByLanguage(taskId, language);
+        val data = CodeData(
+            id = UUID.randomUUID().toString(),
+            code = code,
+            test = task.code?.testCode ?: throw NotFoundException(),
+            files = task.files?.map { File(fileName = it.fileName, fileText = it.fileText) } ?: emptyList()
+        );
+
+        return executeCode(data, language);
+    }
+
+    fun executeCode(data: CodeData, language: String): CodeResponse? {
         val taskObject = TaskQueueObject(id = data.id, retryCount = 0);
         taskRepository.save(taskObject);
 
@@ -85,7 +105,6 @@ class CodeDataFetcher {
         val res = Json.decodeFromString<CodeResponse>(strBody);
         return res;
     }
-
     @DgsMutation
     @Authenticate
     fun submitCode(submission: UserCodeSubmissionInput): Boolean {

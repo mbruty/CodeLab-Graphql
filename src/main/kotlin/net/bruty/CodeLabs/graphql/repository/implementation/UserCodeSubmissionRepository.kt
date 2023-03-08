@@ -2,8 +2,8 @@ package net.bruty.CodeLabs.graphql.repository.implementation
 
 import net.bruty.CodeLabs.graphql.exceptions.NotFoundException
 import net.bruty.CodeLabs.graphql.exceptions.UnauthorisedException
+import net.bruty.CodeLabs.graphql.extensions.toUUID
 import net.bruty.CodeLabs.graphql.model.*
-import net.bruty.CodeLabs.graphql.model.ProgrammingTaskTable.entityId
 import net.bruty.CodeLabs.graphql.repository.interfaces.IUserCodeSubmissionRepository
 import net.bruty.CodeLabs.graphql.security.HttpContext
 import net.bruty.types.UserCodeSubmission
@@ -12,6 +12,7 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import java.lang.NullPointerException
 
 @Component
 class UserCodeSubmissionRepository: IUserCodeSubmissionRepository {
@@ -48,7 +49,7 @@ class UserCodeSubmissionRepository: IUserCodeSubmissionRepository {
     override fun upsert(obj: UserCodeSubmissionInput) {
         return transaction {
             addLogger(StdOutSqlLogger)
-            val userId = httpContext.principal!!.userId
+            val userId = httpContext.principal?.userUUID ?: throw UnauthorisedException()
             val pair = UserCodeSubmissionTable
                 .innerJoin(UsersTable)
                 .innerJoin(LanguageTable)
@@ -58,36 +59,37 @@ class UserCodeSubmissionRepository: IUserCodeSubmissionRepository {
                 .select {
                     (UsersTable.id eq userId) and
                     (LanguageTable.language eq obj.language) and
-                    (ProgrammingTaskTable.id eq obj.taskId)
+                    (ProgrammingTaskTable.id eq obj.taskId.toUUID())
                 }.map { Pair(it[UserCodeSubmissionTable.id], it[LanguageTable.id]) }
                 .firstOrNull()
 
+            val foundLanguage = LanguageEntity.find { LanguageTable.language eq obj.language }
+                .firstOrNull() ?: throw NotFoundException()
+            val foundTask = ProgrammingTaskEntity.findById(obj.taskId.toUUID()) ?: throw NotFoundException()
+            val user = UserEntity.findById(userId) ?: throw UnauthorisedException()
+
             if(pair == null) {
-                val foundLanguage = LanguageEntity.find { LanguageTable.language eq obj.language }
-                    .firstOrNull() ?: throw NotFoundException()
-                UserCodeSubmissionTable.insert {
-                    it[task] = obj.taskId
-                    it[codeText] = obj.codeText
-                    it[executionTime] = obj.executionTime
-                    it[memoryUsage] = obj.memoryUsage?.joinToString { UserCodeSubmissionEntity.SEPARATOR }
-                    it[isSubmitted] = obj.isSubmitted ?: false
-                    it[hasSharedWithModuleStaff] = obj.hasSharedWithModuleStaff ?: false
-                    it[hasSharedWithStudents] = obj.hasSharedWithStudents ?: false
-                    it[language] = foundLanguage.id
-                    it[createdBy] = httpContext.principal?.userId ?: throw UnauthorisedException()
+                UserCodeSubmissionEntity.new {
+                    task = foundTask
+                    codeText = obj.codeText
+                    executionTime = obj.executionTime
+                    memoryUsage = obj.memoryUsage?.toTypedArray() ?: emptyArray()
+                    isSubmitted = obj.isSubmitted ?: false
+                    hasSharedWithModuleStaff = obj.hasSharedWithModuleStaff ?: false
+                    language = foundLanguage
+                    createdBy = user
                 }
             }
             else {
-                UserCodeSubmissionTable.update({ UserCodeSubmissionTable.id eq pair.first }) {
-                    it[codeText] = obj.codeText
-                    it[executionTime] = obj.executionTime
-                    it[memoryUsage] = obj.memoryUsage?.joinToString { UserCodeSubmissionEntity.SEPARATOR }
-                    it[isSubmitted] = obj.isSubmitted ?: false
-                    it[hasSharedWithModuleStaff] = obj.hasSharedWithModuleStaff ?: false
-                    it[hasSharedWithStudents] = obj.hasSharedWithStudents ?: false
-                    it[language] = pair.second
-                    it[createdBy] = httpContext.principal?.userId ?: throw UnauthorisedException()
-                }
+                val existing = UserCodeSubmissionEntity.findById(pair.first) ?: throw NotFoundException()
+                existing.codeText = obj.codeText
+                existing.executionTime = obj.executionTime
+                existing.memoryUsage = obj.memoryUsage?.toTypedArray() ?: emptyArray()
+                existing.isSubmitted = obj.isSubmitted ?: false
+                existing.hasSharedWithModuleStaff = obj.hasSharedWithModuleStaff ?: false
+                existing.hasSharedWithStudents = obj.hasSharedWithStudents ?: false
+                existing.language = foundLanguage
+                existing.createdBy = user
             }
         }
     }

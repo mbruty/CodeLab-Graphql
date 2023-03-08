@@ -3,7 +3,7 @@ package net.bruty.CodeLabs.graphql.repository.interfaces
 import net.bruty.CodeLabs.graphql.model.UserEntity
 import net.bruty.types.User
 
-interface IUserRepository: IIntIDRepository<UserEntity, User> {
+interface IUserRepository: IUUIDRepository<UserEntity, User> {
     fun findByEmail(email: String): UserEntity?
-    fun logoutAll(id: Int)
+    fun logoutAll(id: String)
 }

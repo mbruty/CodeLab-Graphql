@@ -1,6 +1,8 @@
 package net.bruty.CodeLabs.graphql.repository.implementation
 
 import net.bruty.CodeLabs.graphql.exceptions.NotFoundException
+import net.bruty.CodeLabs.graphql.exceptions.UnauthorisedException
+import net.bruty.CodeLabs.graphql.extensions.toUUID
 import net.bruty.CodeLabs.graphql.model.UserEntity
 import net.bruty.CodeLabs.graphql.model.UsersTable
 import net.bruty.CodeLabs.graphql.repository.interfaces.IUserRepository
@@ -19,23 +21,22 @@ class UserRepository: IUserRepository {
         }
     }
 
-    override fun logoutAll(id: Int) {
+    override fun logoutAll(id: String) {
         transaction {
-            UsersTable.update({ UsersTable.id eq id }) {
-                it[refereshCount] = refereshCount + 1
-            }
+            val user = UserEntity.findById(id.toUUID()) ?: throw UnauthorisedException()
+            user.refreshCount += 1
         }
     }
 
-    override fun findById(id: Int): UserEntity? {
+    override fun findById(id: String): UserEntity? {
         return transaction {
-            UserEntity.findById(id)
+            UserEntity.findById(id.toUUID())
         }
     }
 
-    override fun findByIdOrThrow(id: Int): UserEntity {
+    override fun findByIdOrThrow(id: String): UserEntity {
         return transaction {
-            UserEntity.findById(id) ?: throw NotFoundException()
+            UserEntity.findById(id.toUUID()) ?: throw NotFoundException()
         }
     }
 

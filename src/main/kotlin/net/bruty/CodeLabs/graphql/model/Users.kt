@@ -1,25 +1,26 @@
 package net.bruty.CodeLabs.graphql.model
 
-import net.bruty.CodeLabs.graphql.model.ProgrammingTaskEntity.Companion.referrersOn
+import net.bruty.CodeLabs.graphql.extensions.toUUID
 import net.bruty.CodeLabs.graphql.security.IPrincipal
 import net.bruty.CodeLabs.graphql.security.UserPrincipal
 import net.bruty.types.User
-import org.jetbrains.exposed.dao.IntEntity
-import org.jetbrains.exposed.dao.IntEntityClass
+import org.jetbrains.exposed.dao.UUIDEntity
+import org.jetbrains.exposed.dao.UUIDEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.Column
 import org.mindrot.jbcrypt.BCrypt
+import java.util.UUID
 
-object UsersTable: IntIdTable() {
+object UsersTable: UUIDTable() {
     val email: Column<String> = varchar("email", 50).uniqueIndex()
     val username: Column<String> = varchar("name", 25)
     val password: Column<String> = varchar("password", 72) // 72 is Bcrypt maximum hash length
     val refereshCount: Column<Int> = integer("refresh_count").default(0)
     val xp: Column<Int> = integer("xp").default(0)
 }
-class UserEntity(id: EntityID<Int>): IntEntity(id) {
-    companion object : IntEntityClass<UserEntity>(UsersTable)
+class UserEntity(id: EntityID<UUID>): UUIDEntity(id) {
+    companion object : UUIDEntityClass<UserEntity>(UsersTable)
     var email by UsersTable.email
     var username by UsersTable.username
     var xp by UsersTable.xp
@@ -39,7 +40,7 @@ class UserEntity(id: EntityID<Int>): IntEntity(id) {
     var refreshCount by UsersTable.refereshCount
 
     fun toModel(): User {
-        return User(id.value, email, username, password = "REDACTED", refreshCount, xp)
+        return User(id.toString(), email, username, password = "REDACTED", refreshCount, xp)
     }
 
     fun verifyHash(password: String): Boolean {
@@ -47,6 +48,6 @@ class UserEntity(id: EntityID<Int>): IntEntity(id) {
     }
 
     fun toPrincipal(): IPrincipal {
-        return UserPrincipal(this.id.value, this.refreshCount)
+        return UserPrincipal(this.id.toString(), this.id.toString().toUUID(), this.refreshCount)
     }
 }

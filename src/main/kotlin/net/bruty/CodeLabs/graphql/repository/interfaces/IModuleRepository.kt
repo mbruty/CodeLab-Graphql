@@ -5,10 +5,10 @@ import net.bruty.types.Module
 import net.bruty.types.ProgrammingTask
 import net.bruty.types.User
 
-interface IModuleRepository: IIntIDRepository<ModuleEntity, Module> {
-    fun getTasks(id: Int): List<ProgrammingTask>;
-    fun getCreatedBy(id: Int): User;
-    fun getCompletedPct(id: Int, userId: Int): Float;
-    fun link(moduleID: Int, taskID: Int, userID: Int);
-    fun findEnrolled(userId: Int): List<Module>;
+interface IModuleRepository: IUUIDRepository<ModuleEntity, Module> {
+    fun getTasks(id: String): List<ProgrammingTask>;
+    fun getCreatedBy(id: String): User;
+    fun getCompletedPct(id: String, userId: String): Float;
+    fun link(moduleID: String, taskID: String, userID: String);
+    fun findEnrolled(userId: String): List<Module>;
 }

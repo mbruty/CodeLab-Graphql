@@ -100,7 +100,7 @@ internal class UserCodeSubmissionRepositoryTest {
 
         val args = UserCodeSubmissionInput(
             codeText = "test2",
-            taskId = _task.id.value,
+            taskId = _task.id.value.toString(),
             language = language2.language
         )
         _repo.upsert(args)

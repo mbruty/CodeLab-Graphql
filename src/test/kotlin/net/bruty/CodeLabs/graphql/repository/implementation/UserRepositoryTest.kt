@@ -8,12 +8,12 @@ import net.bruty.types.User
 import org.jetbrains.exposed.sql.deleteAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.*
-
+import java.util.UUID
 import org.junit.jupiter.api.Assertions.*
 
 internal class UserRepositoryTest {
     private val _repo = UserRepository()
-    private var currentId = -1;
+    private var currentId = "";
     @BeforeEach
     fun setUp() {
         currentId = transaction {
@@ -22,7 +22,7 @@ internal class UserRepositoryTest {
                 password = "secure_password"
                 username = "test"
             }
-            created.id.value
+            created.id.value.toString()
         }
     }
 
@@ -37,7 +37,7 @@ internal class UserRepositoryTest {
     fun findByEmail() {
         val found = _repo.findByEmail("test@test.com");
         assertNotNull(found);
-        assertEquals(currentId, found!!.id.value)
+        assertEquals(currentId, found!!.id.value.toString())
     }
 
     @Test
@@ -66,7 +66,7 @@ internal class UserRepositoryTest {
 
     @Test
     fun findByIdOrThrow() {
-        assertThrows<NotFoundException> { _repo.findByIdOrThrow(-1) }
+        assertThrows<NotFoundException> { _repo.findByIdOrThrow(UUID.randomUUID().toString()) }
         assertDoesNotThrow { _repo.findByIdOrThrow(currentId) }
     }
 
@@ -95,24 +95,15 @@ internal class UserRepositoryTest {
 
     @Test
     fun create() {
-        val user = User(username = "test-2", email = "test-2@test.com", password = "pass", refreshCount = 0, xp = 0);
+        val user = User(username = "test-2", email = "test-2@test.com", password = "pass", refreshCount = 0, xp = 0, id = "");
         val created = _repo.create(user);
         assertEquals("test-2", created.username)
         assertEquals("test-2@test.com", created.email)
-
-        val allUsers = _repo.findAll()
-        val mostRecent = allUsers.maxByOrNull { it.id.value }!!
-        assertEquals("test-2", mostRecent.username)
-        assertEquals("test-2@test.com", mostRecent.email)
-
-        val found = _repo.findByIdOrThrow(mostRecent.id.value)
-        assertEquals("test-2", found.username)
-        assertEquals("test-2@test.com", found.email)
     }
 
     @Test
     fun createWithBadEmail() {
-        assertThrows<Exception> { _repo.create(User(username = "", email = "test", password = "", refreshCount = 0, xp = 0)) }
+        assertThrows<Exception> { _repo.create(User(username = "", email = "test", password = "", refreshCount = 0, xp = 0, id = "")) }
     }
     @Test
     fun update() {

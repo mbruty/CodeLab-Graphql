@@ -3,6 +3,7 @@ package net.bruty.CodeLabs.graphql.repository.implementation
 import net.bruty.CodeLabs.graphql.exceptions.AlreadyExistsException
 import net.bruty.CodeLabs.graphql.exceptions.NotFoundException
 import net.bruty.CodeLabs.graphql.exceptions.UnauthorisedException
+import net.bruty.CodeLabs.graphql.extensions.toUUID
 import net.bruty.CodeLabs.graphql.model.*
 import net.bruty.CodeLabs.graphql.repository.interfaces.IModuleRepository
 import net.bruty.types.Module
@@ -16,9 +17,9 @@ import org.springframework.stereotype.Component
 
 @Component
 class ModuleRepository: IModuleRepository {
-    override fun getTasks(id: Int): List<ProgrammingTask> {
+    override fun getTasks(id: String): List<ProgrammingTask> {
         return transaction {
-            val entity = ModuleEntity.findById(id) ?: throw NotFoundException();
+            val entity = ModuleEntity.findById(id.toUUID()) ?: throw NotFoundException();
             return@transaction entity.tasks.toList().map {
                 ProgrammingTask(
                     id = it.id.value.toString(),
@@ -29,12 +30,12 @@ class ModuleRepository: IModuleRepository {
         }
     }
 
-    override fun getCreatedBy(id: Int): User {
+    override fun getCreatedBy(id: String): User {
         return transaction {
             val module = findByIdOrThrow(id);
             val found = module.createdBy;
             return@transaction User(
-                id = found.id.value,
+                id = found.id.toString(),
                 email = "redacted",
                 username = found.username,
                 password = "redacted",
@@ -45,7 +46,7 @@ class ModuleRepository: IModuleRepository {
 
     }
 
-    override fun getCompletedPct(id: Int, userId: Int): Float {
+    override fun getCompletedPct(id: String, userId: String): Float {
         val completed = transaction {
             UsersTable
                 .innerJoin(UserCodeSubmissionTable)
@@ -54,9 +55,9 @@ class ModuleRepository: IModuleRepository {
                 .innerJoin(ModuleTable, { ModuleTable.id }, { ModuleTaskTable.module })
                 .slice(UserCodeSubmissionTable.id.count())
                 .select {
-                    UsersTable.id eq userId and
+                    UsersTable.id eq userId.toUUID() and
                             (UserCodeSubmissionTable.isSubmitted) and
-                            (ModuleTable.id eq id)
+                            (ModuleTable.id eq id.toUUID())
                 }
                 .groupBy(ProgrammingTaskTable.id)
                 .count()
@@ -68,7 +69,7 @@ class ModuleRepository: IModuleRepository {
                 .innerJoin(ModuleTaskTable)
                 .innerJoin(ProgrammingTaskTable)
                 .slice(ModuleTaskTable.module.count())
-                .select { ModuleTable.id eq id }
+                .select { ModuleTable.id eq id.toUUID() }
                 .groupBy(ProgrammingTaskTable.id)
                 .count()
         }
@@ -76,52 +77,35 @@ class ModuleRepository: IModuleRepository {
         return ((completed / total) * 100).toFloat();
     }
 
-    override fun link(moduleID: Int, taskID: Int, userID: Int) {
+    override fun link(moduleID: String, taskID: String, userID: String) {
         transaction {
-            addLogger(StdOutSqlLogger)
-            val foundModule = ModuleEntity.findById(moduleID) ?: throw NotFoundException()
+            val module = ModuleEntity.findById(moduleID.toUUID()) ?: throw NotFoundException()
+            val task = ProgrammingTaskEntity.findById(taskID.toUUID()) ?: throw NotFoundException()
 
-            if(foundModule.createdBy.id.value != userID) throw UnauthorisedException()
+            if(module.createdBy.id.value != userID.toUUID()) throw UnauthorisedException()
 
-            val maxOrder = ModuleTaskTable
-                .slice(ModuleTaskTable.order.max())
-                .select {
-                    ModuleTaskTable.module eq foundModule.id
-                }
-                .groupBy(ModuleTaskTable.module)
-                .firstOrNull()
-
-            val notNullOrder = maxOrder?.getOrNull(ModuleTaskTable.order) ?: -1
-
-            try {
-                ModuleTaskTable.insert {
-                    it[order] = notNullOrder + 1
-                    it[module] = foundModule.id
-                    it[task] = taskID
-                }
-            } catch (e: ExposedSQLException) {
-                throw AlreadyExistsException()
-            }
-
+            val tasks = module.tasks.toMutableList()
+            tasks.add(task)
+            module.tasks = SizedCollection(tasks);
         }
     }
 
-    override fun findEnrolled(userId: Int): List<Module> {
+    override fun findEnrolled(userId: String): List<Module> {
         return transaction {
-            val user = UserEntity.findById(userId) ?: throw UnauthorisedException();
+            val user = UserEntity.findById(userId.toUUID()) ?: throw UnauthorisedException();
             user.modules.toList().map { it.toDTO() }
         }
     }
 
-    override fun findById(id: Int): ModuleEntity? {
+    override fun findById(id: String): ModuleEntity? {
         return transaction {
-            ModuleEntity.findById(id)
+            ModuleEntity.findById(id.toUUID())
         }
     }
 
-    override fun findByIdOrThrow(id: Int): ModuleEntity {
+    override fun findByIdOrThrow(id: String): ModuleEntity {
         return transaction {
-            ModuleEntity.findById(id) ?: throw NotFoundException()
+            ModuleEntity.findById(id.toUUID()) ?: throw NotFoundException()
         }
     }
 
@@ -133,7 +117,7 @@ class ModuleRepository: IModuleRepository {
 
     override fun create(obj: Module): ModuleEntity {
         return transaction {
-            val user = obj.createdBy?.id?.let { UserEntity.findById(it) }
+            val user = obj.createdBy?.id?.let { UserEntity.findById(it.toUUID()) }
             user ?: throw UnauthorisedException()
             ModuleEntity.new {
                 title = obj.title

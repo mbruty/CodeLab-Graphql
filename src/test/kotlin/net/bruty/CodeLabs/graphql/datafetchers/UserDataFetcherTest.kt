@@ -21,7 +21,7 @@ import kotlin.reflect.KClass
 @SpringBootTest(classes = [
     DgsAutoConfiguration::class,
     CodeLabsGraphQLApplication::class
-])
+], properties= ["production=false"])
 class UserDataFetcherTest {
 
     @Autowired
@@ -103,7 +103,7 @@ class UserDataFetcherTest {
 
     @Test
     fun me() {
-        val result = dgsQueryExecutor.executeAndExtractJsonPath<Int>("""
+        val result = dgsQueryExecutor.executeAndExtractJsonPath<String>("""
             {
                 me {
                     id
@@ -112,14 +112,14 @@ class UserDataFetcherTest {
         """.trimIndent(), "data.me.id")
 
         val expected = AuthUtils.getTestUser()
-        assertEquals(expected.id.value, result);
+        assertEquals(expected.id.value.toString(), result);
     }
 
     @Test
     fun login() {
         MockCookieHandlerSavedCookies.reset()
 
-        val result = dgsQueryExecutor.executeAndExtractJsonPath<Int>("""
+        val result = dgsQueryExecutor.executeAndExtractJsonPath<String>("""
             mutation {
               login(email:"test@gmail.com", password:"test") {
                 id
@@ -128,7 +128,7 @@ class UserDataFetcherTest {
         """.trimIndent(), "data.login.id");
 
         val expected = AuthUtils.getTestUser()
-        assertEquals(expected.id.value, result)
+        assertEquals(expected.id.value.toString(), result)
         assertEquals(2, MockCookieHandlerSavedCookies.cookies.size);
     }
 

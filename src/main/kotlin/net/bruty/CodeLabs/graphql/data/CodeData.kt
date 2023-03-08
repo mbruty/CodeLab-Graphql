@@ -7,6 +7,5 @@ data class CodeData(
     val id: String,
     val code: String,
     val test: String,
-    val file: String?,
-    val file_name: String?
+    val files: List<File>
 )

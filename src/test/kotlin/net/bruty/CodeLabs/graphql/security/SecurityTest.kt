@@ -77,7 +77,7 @@ internal class SecurityTest {
         _security.setTokens(_user.toPrincipal(), _cookieHandler)
         val refresh = _cookieHandler.cookies["access_token"] ?: fail("Access token is null")
         val user = _security.processToken(refresh) ?: fail("Token could not be parsed")
-        assertEquals(_user.id.value, user.userId)
+        assertEquals(_user.id.value.toString(), user.userId)
         assertEquals(_user.refreshCount, user.refreshCount)
     }
 
@@ -86,7 +86,7 @@ internal class SecurityTest {
         _security.setTokens(_user.toPrincipal(), _cookieHandler)
         val refresh = _cookieHandler.cookies["refresh_token"] ?: fail("Refresh token is null")
         val user = _security.processToken(refresh) ?: fail("Token could not be parsed")
-        assertEquals(_user.id.value, user.userId)
+        assertEquals(_user.id.value.toString(), user.userId)
         assertEquals(_user.refreshCount, user.refreshCount)
     }
 
@@ -109,7 +109,7 @@ internal class SecurityTest {
         val refresh = _cookieHandler.cookies["refresh_token"] ?: fail("Refresh token is null")
         val user = _security.getPrincipal(access, refresh, _cookieHandler)
 
-        assertEquals(_user.id.value, user.userId)
+        assertEquals(_user.id.value.toString(), user.userId)
         assertEquals(_user.refreshCount, user.refreshCount)
     }
 
@@ -123,7 +123,7 @@ internal class SecurityTest {
         val refresh = _cookieHandler.cookies["refresh_token"] ?: fail("Refresh token is null")
         val user = _security.getPrincipal(access, refresh, _cookieHandler)
 
-        assertEquals(_user.id.value, user.userId)
+        assertEquals(_user.id.value.toString(), user.userId)
         assertEquals(_user.refreshCount, user.refreshCount)
 
         val accessRefreshed = _cookieHandler.cookies["access_token"] ?: fail("Access token is null")

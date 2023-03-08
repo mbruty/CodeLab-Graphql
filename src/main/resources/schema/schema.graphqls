@@ -2,11 +2,13 @@ scalar Long
 
 type Query {
     authCheck: Boolean
-    evaluate(code: String!, language: String!, taskId: Int!): CodeResponse!
+    evaluate(code: String!, language: String!, taskId: ID!): CodeResponse!
+    evaluateTest(code: String!, testCode: String!, files: [FileInput], language: String!): CodeResponse!
     me: User!
-    module(moduleId: Int!): Module!
+    module(moduleId: ID!): Module!
     myModules: [Module]!
-    programmingTask(taskId: Int!, language: String!): ProgrammingTask!
+    editableModules: [Module]!
+    programmingTask(taskId: ID!): ProgrammingTask!
     availableLanguages: [String]
 }
 
@@ -17,12 +19,24 @@ input UserCodeSubmissionInput {
     isSubmitted: Boolean
     hasSharedWithModuleStaff: Boolean
     hasSharedWithStudents: Boolean
-    taskId: Int!
+    taskId: ID!
     language: String!
+}
+
+input FileInput {
+    text: String!
+    fileName: String!
+}
+
+input StarterCodeInput {
+    testCode: String!
+    starterCode: String!
+    languageId: Int!
 }
 
 type Mutation {
     createModule(moduleTitle: String!, moduleDescription: String!): Boolean!
+    createTask(title:String!, description:String!, starterCodes: [StarterCodeInput]!, files: [FileInput]!): Boolean!
     linkModuleTask(moduleID: ID!, taskID: ID!): Boolean!
     login(email: String!, password: String!): User
     logout: Boolean
@@ -56,7 +70,7 @@ type Stat {
 }
 
 type User {
-    id: Int
+    id: ID!
     email: String!
     username: String!
     password: String!
@@ -64,17 +78,25 @@ type User {
     xp: Int!
 }
 
+type File {
+    fileName: String!
+    fileText: String!
+}
+
+type ProgrammingTaskCode {
+    starterCode: String!
+    testCode: String!
+    myCode: String!
+    language: String!
+}
+
 type ProgrammingTask {
     id: ID!
     title: String!
     description: String!
-    starterCode: String
-    testCode: String
-    language: String
+    code(language: String!): ProgrammingTaskCode
     availableLanguages: [String]
-    myCode: String
-    includedFiles: String
-    fileName: String
+    files: [File!]
 }
 
 type UserCodeSubmission {
