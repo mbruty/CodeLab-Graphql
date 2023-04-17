@@ -29,8 +29,8 @@ class AppConfig: WebMvcConfigurer {
     @Bean
     fun jedisConnectionFactory(): JedisConnectionFactory? {
         val redisStandaloneConfiguration = RedisStandaloneConfiguration()
-        redisStandaloneConfiguration.hostName = "redis-13064.c250.eu-central-1-1.ec2.cloud.redislabs.com"
-        redisStandaloneConfiguration.port = 13064
+        redisStandaloneConfiguration.hostName = "213.171.211.224"
+        redisStandaloneConfiguration.port = 6379
         redisStandaloneConfiguration.password = RedisPassword.of("GjgXGvNUDhT0WBxLdbnRKAnKVPUuOJkR")
         val jedisClientConfiguration: JedisClientConfiguration.JedisClientConfigurationBuilder = JedisClientConfiguration.builder()
         jedisClientConfiguration.connectTimeout(Duration.ofMillis(10_000))
