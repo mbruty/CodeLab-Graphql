@@ -74,7 +74,7 @@ class UserCodeSubmissionRepository: IUserCodeSubmissionRepository {
                     codeText = obj.codeText
                     executionTime = obj.executionTime
                     memoryUsage = obj.memoryUsage?.toTypedArray() ?: emptyArray()
-                    isSubmitted = obj.isSubmitted ?: false
+                    isCompleted = obj.isCompleted ?: false
                     hasSharedWithModuleStaff = obj.hasSharedWithModuleStaff ?: false
                     language = foundLanguage
                     createdBy = user
@@ -85,7 +85,7 @@ class UserCodeSubmissionRepository: IUserCodeSubmissionRepository {
                 existing.codeText = obj.codeText
                 existing.executionTime = obj.executionTime
                 existing.memoryUsage = obj.memoryUsage?.toTypedArray() ?: emptyArray()
-                existing.isSubmitted = obj.isSubmitted ?: false
+                existing.isCompleted = obj.isCompleted ?: false
                 existing.hasSharedWithModuleStaff = obj.hasSharedWithModuleStaff ?: false
                 existing.hasSharedWithStudents = obj.hasSharedWithStudents ?: false
                 existing.language = foundLanguage

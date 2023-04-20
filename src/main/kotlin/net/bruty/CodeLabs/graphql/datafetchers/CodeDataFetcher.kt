@@ -18,6 +18,7 @@ import net.bruty.CodeLabs.graphql.repository.interfaces.IProgrammingTaskReposito
 import net.bruty.CodeLabs.graphql.repository.interfaces.IUserCodeSubmissionRepository
 import net.bruty.CodeLabs.graphql.repository.interfaces.TaskRepository
 import net.bruty.types.UserCodeSubmissionInput
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.amqp.core.DirectExchange
 import org.springframework.amqp.core.Message
 import org.springframework.amqp.rabbit.core.RabbitTemplate
@@ -44,6 +45,9 @@ class CodeDataFetcher {
     @Autowired
     lateinit var taskRepository: TaskRepository
 
+    @Autowired
+    lateinit var userCodeSubmissionRepository: IUserCodeSubmissionRepository
+
     @DgsQuery
     fun evaluateTest(code: String, testCode: String, language: String, files: List<File>): CodeResponse? {
         val data = CodeData(
@@ -65,7 +69,18 @@ class CodeDataFetcher {
             files = task.files?.map { File(fileName = it.fileName, fileText = it.fileText) } ?: emptyList()
         );
 
-        return executeCode(data, language);
+        val executionResponse = executeCode(data, language);
+        if (executionResponse?.isSuccessful == true) {
+            codeRepository.upsert(
+                UserCodeSubmissionInput(
+                    codeText = code,
+                    language = language,
+                    taskId = taskId,
+                    isCompleted = true
+                )
+            )
+        }
+        return executionResponse
     }
 
     fun executeCode(data: CodeData, language: String): CodeResponse? {
@@ -110,7 +125,10 @@ class CodeDataFetcher {
     fun submitCode(submission: UserCodeSubmissionInput): Boolean {
         var isSuccess = true;
         try {
-            codeRepository.upsert(submission);
+            codeRepository.upsert(
+                // If the code has changed, we assume that it's not completed
+                submission.copy(isCompleted = false)
+            );
         } catch (e: UnauthorisedException) {
             throw e;
         } catch (e: Exception) {

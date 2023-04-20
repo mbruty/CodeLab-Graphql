@@ -56,7 +56,7 @@ class ModuleRepository: IModuleRepository {
                 .slice(UserCodeSubmissionTable.id.count())
                 .select {
                     UsersTable.id eq userId.toUUID() and
-                            (UserCodeSubmissionTable.isSubmitted) and
+                            (UserCodeSubmissionTable.isCompleted) and
                             (ModuleTable.id eq id.toUUID())
                 }
                 .groupBy(ProgrammingTaskTable.id)

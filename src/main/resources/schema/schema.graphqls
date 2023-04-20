@@ -16,7 +16,7 @@ input UserCodeSubmissionInput {
     codeText: String!
     executionTime: Int
     memoryUsage: [Int]
-    isSubmitted: Boolean
+    isCompleted: Boolean
     hasSharedWithModuleStaff: Boolean
     hasSharedWithStudents: Boolean
     taskId: ID!
