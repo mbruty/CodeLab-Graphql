@@ -74,7 +74,7 @@ class ModuleRepository: IModuleRepository {
                 .count()
         }
 
-        return ((completed / total) * 100).toFloat();
+        return (completed.toFloat() / total.toFloat()) * 100;
     }
 
     override fun link(moduleID: String, taskID: String, userID: String) {
