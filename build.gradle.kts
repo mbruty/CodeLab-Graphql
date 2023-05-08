@@ -112,6 +112,10 @@ dependencies {
 	implementation("org.postgresql:postgresql:42.5.0")
 	// endregion
 
+	// region Test Containers
+	testImplementation("org.testcontainers:postgresql:1.17.6")
+	// endregion
+
 	// region Spring
 	implementation("org.springframework.boot:spring-boot-starter-amqp") // Advance message query protocol | rabbitmq
 	implementation("org.springframework.boot:spring-boot-starter-web")

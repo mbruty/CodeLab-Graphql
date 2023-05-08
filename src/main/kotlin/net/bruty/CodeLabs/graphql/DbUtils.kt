@@ -17,10 +17,6 @@ class DbUtils {
             )
         }
 
-        fun connectTest() {
-            Database.connect("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", driver = "org.h2.Driver", user = "root", password = "")
-        }
-
         fun createTables() {
             transaction {
                 SchemaUtils.create(UsersTable)

@@ -4,6 +4,7 @@ import net.bruty.CodeLabs.graphql.DbUtils
 import net.bruty.CodeLabs.graphql.exceptions.NotFoundException
 import net.bruty.CodeLabs.graphql.model.*
 import net.bruty.CodeLabs.graphql.security.HttpContext
+import net.bruty.CodeLabs.graphql.utils.TestDbUtils
 import net.bruty.types.UserCodeSubmissionInput
 import org.jetbrains.exposed.sql.deleteAll
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -111,14 +112,14 @@ internal class UserCodeSubmissionRepositoryTest {
         @JvmStatic
         @BeforeAll
         fun setupAll() {
-            DbUtils.connectTest();
-            DbUtils.createTables()
+            TestDbUtils.createTestDb();
         }
 
         @JvmStatic
         @AfterAll
         fun tearDownAll() {
-            DbUtils.dropTables()
+            TestDbUtils.close()
+
         }
     }
 }

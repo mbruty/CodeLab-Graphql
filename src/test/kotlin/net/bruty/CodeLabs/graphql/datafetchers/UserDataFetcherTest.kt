@@ -11,6 +11,7 @@ import net.bruty.CodeLabs.graphql.mocks.MockCookieHandlerSavedCookies
 import net.bruty.CodeLabs.graphql.model.UserEntity
 import net.bruty.CodeLabs.graphql.model.UsersTable
 import net.bruty.CodeLabs.graphql.utils.AuthUtils
+import net.bruty.CodeLabs.graphql.utils.TestDbUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
@@ -43,15 +44,14 @@ class UserDataFetcherTest {
         @JvmStatic
         @BeforeAll
         fun setupAll() {
-            DbUtils.connectTest();
-            DbUtils.createTables()
+            TestDbUtils.createTestDb()
             CookieHandlerFactory.factoryClass = MockCookieHandlerSavedCookies::class as KClass<ICookieHandler>
         }
 
         @JvmStatic
         @AfterAll
         fun tearDownAll() {
-            DbUtils.dropTables()
+            TestDbUtils.close()
             CookieHandlerFactory.factoryClass = CookieHandler::class as KClass<ICookieHandler>
 
         }
@@ -201,27 +201,25 @@ class UserDataFetcherTest {
         assertEquals(AuthUtils.UNAUTHORIZED_MESSAGE, result.errors[0].message)
     }
 
-    // Temporarily disable this test
-    // Need to add testcontainers to stop it breaking
-//    @Test
-//    fun signUp() {
-//
-//        val result = dgsQueryExecutor.execute("""
-//            mutation {
-//                signUp(email: "test2@test.com", username: "test2", password: "test123!") {
-//                    id
-//                }
-//            }
-//        """.trimIndent())
-//
-//        assertEquals(0, result.errors.size)
-//
-//        val user = transaction {
-//            UserEntity.find { UsersTable.email eq "test2@test.com" }.firstOrNull()
-//        }
-//
-//        assertNotNull(user)
-//        assertEquals("test2@test.com", user!!.email)
-//        assertEquals("test2", user.username)
-//    }
+    @Test
+    fun signUp() {
+
+        val result = dgsQueryExecutor.execute("""
+            mutation {
+                signUp(email: "test2@test.com", username: "test2", password: "test123!") {
+                    id
+                }
+            }
+        """.trimIndent())
+
+        assertEquals(0, result.errors.size)
+
+        val user = transaction {
+            UserEntity.find { UsersTable.email eq "test2@test.com" }.firstOrNull()
+        }
+
+        assertNotNull(user)
+        assertEquals("test2@test.com", user!!.email)
+        assertEquals("test2", user.username)
+    }
 }

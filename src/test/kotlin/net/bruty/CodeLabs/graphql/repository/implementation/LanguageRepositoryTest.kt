@@ -4,6 +4,7 @@ import net.bruty.CodeLabs.graphql.DbUtils
 import net.bruty.CodeLabs.graphql.model.LanguageTable
 import net.bruty.CodeLabs.graphql.repository.implementation.LanguageRepository
 import net.bruty.CodeLabs.graphql.repository.interfaces.ILanguageRepository
+import net.bruty.CodeLabs.graphql.utils.TestDbUtils
 import org.jetbrains.exposed.sql.deleteAll
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -47,14 +48,14 @@ internal class LanguageRepositoryTest {
         @JvmStatic
         @BeforeAll
         fun setupAll() {
-            DbUtils.connectTest();
-            DbUtils.createTables()
+            TestDbUtils.createTestDb();
         }
 
         @JvmStatic
         @AfterAll
         fun tearDownAll() {
-            DbUtils.dropTables()
+            TestDbUtils.close()
+
         }
     }
 }

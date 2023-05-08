@@ -4,6 +4,7 @@ import net.bruty.CodeLabs.graphql.DbUtils
 import net.bruty.CodeLabs.graphql.exceptions.NotFoundException
 import net.bruty.CodeLabs.graphql.model.UserEntity
 import net.bruty.CodeLabs.graphql.model.UsersTable
+import net.bruty.CodeLabs.graphql.utils.TestDbUtils
 import net.bruty.types.User
 import org.jetbrains.exposed.sql.deleteAll
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -113,14 +114,15 @@ internal class UserRepositoryTest {
         @JvmStatic
         @BeforeAll
         fun setupAll() {
-            DbUtils.connectTest();
+            TestDbUtils.createTestDb()
             DbUtils.createTables()
         }
 
         @JvmStatic
         @AfterAll
         fun tearDownAll() {
-            DbUtils.dropTables()
+            TestDbUtils.close()
+
         }
     }
 }
