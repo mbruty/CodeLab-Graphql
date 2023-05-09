@@ -16,7 +16,6 @@ Ensure that you have Java version 17 or newer.
  1. Clone the repository
  2. Run `./gradlew build --refresh-dependencies`
  3. Run `java ./build/libs/COMP3000-Graphql-<version number>.jar`
- 4. 
 ## Setup
 Ensure that you have yout GitHub personal-access-token linked to docker.
 
