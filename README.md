@@ -1,4 +1,4 @@
-# CodeLab - Website
+# CodeLab - API
 ## Navigation
 [Website](https://github.com/mbruty/mike-CodeLab-Web)
 
