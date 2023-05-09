@@ -1,4 +1,7 @@
 # CodeLab - API
+[Interactive API](https://gql.bruty.net/graphiql)
+
+[Hosted API](https://gql.bruty.net/graphql)
 ## Navigation
 [Website](https://github.com/mbruty/mike-CodeLab-Web)
 
