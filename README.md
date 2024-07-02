@@ -1,15 +1,11 @@
-# CodeLab - API
-[Interactive API](https://gql.bruty.net/graphiql)
-
-[Hosted API](https://gql.bruty.net/graphql)
 ## Navigation
-[Website](https://github.com/mbruty/mike-CodeLab-Web)
+[Website](https://github.com/mbruty/CodeLab-Web)
 
 API
 
-[CodeEngine](https://github.com/mbruty/mike-CodeLab-CodeEngine)
+[CodeEngine](https://github.com/mbruty/CodeLab-CodeEngine)
 
-[Docker Scheduler](https://github.com/mbruty/mike-CodeLab-Scheduler)
+[Docker Scheduler](https://github.com/mbruty/CodeLab-Scheduler)
 ## Project Vision
 Many software developers rely on online coding platforms, such as LeetCode, to enhance their knowledge. These platforms have been successful with students who want to expand their learning beyond what is taught. These platforms could also be helpful in educational institutions to teach software development. However, the current platform’s lack the ability for teachers to create tasks and courses, and they do not provide enough insight into the effects of optimisations on the users' code.
 
